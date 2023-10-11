@@ -15,41 +15,46 @@
 
         // votes : state 구조인가 ?
         let votes; 
+        let uploadImageState = 'none'
+
         function showState() {
             $.ajax({
                 type: "GET",
-                url: "/api/list",
+                url: "/api/votes",
                 data: {},
                 success: function (response) {
                     votes = response
+                    console.log(votes)
                     show_profile('hot')
-                    show_profile('cold')
                     show_profile('good')
-                    show_climate(votes[most])
+                    show_profile('cold')
+                    show_climate(votes['most'])
                 }
             })
         }
         function show_profile(state) {
-            for (let i = 0; i < votes.length; i++) {
-                if (votes[i] == state) {
-                    // 프로필 사진 불러오기 
-                }
+            for (let i = 0; i < votes[state].length; i++) {
+                console.log(votes[state][i])
             }
 
         }
         function show_climate(state) {
             $.ajax({
                 type : "GET",
-                url : "/api/image",
-                data : {},
+                url : "/api/stateImages",
+                data : {'state' :state},
                 success : function(response){
+                    img_url = response
+                    console.log(img_url)
+                    //이미지 들어갈 태그를 아이디로 찾아서
+                    //imgsrc = imgurl
                     // 여기에 state에 대응되는 사진이 나오도록 구현해야 됨
                     // 서버에서 state에 대응되는 url을 가져와야 되는데 state : url 구조의 딕셔너리인지 어떻게 해야될지 모르겠음...
                 }
             })
         }
         // 상태 업데이트 함수
-        let uploadImageState = 'none'
+        
         function updateState(newState) {
             $.ajax({
                 type: 'POST',
@@ -66,11 +71,13 @@
         }
         function uploadFile() {
             var formData = new FormData($('#uploadForm')[0]);
+            formData.append('email','valen@gmail.com')
+            formData.append('state',uploadImageState)
             console.log("전송", formData)
             $.ajax({
-                url: '/uploadImage',
+                url: '/api/uploadImage',
                 type: 'POST',
-                data: { file: formData },
+                data: formData,
                 processData: false, // 중요: 이 설정을 통해 jQuery가 데이터를 쿼리 문자열로 변환하는 것을 방지합니다.
                 contentType: false, // 중요: FormData를 사용할 때는 'multipart/form-data'로 설정하되, 자동 생성되도록 둡니다.
                 success: function (response) {
@@ -81,18 +88,6 @@
                 }
             });
         }
-
-        hotButton.addEventListener('click', () => {
-            updateState('Hot');
-        });
-
-        goodButton.addEventListener('click', () => {
-            updateState('Good');
-        });
-
-        coldButton.addEventListener('click', () => {
-            updateState('Cold');
-        });
 
         function handleFileSelect(state) {
             uploadImageState = state
