@@ -2,6 +2,8 @@ from bson import ObjectId
 from pymongo import MongoClient, DESCENDING
 import boto3
 
+import jwt
+import hashlib
 from flask import Flask, render_template, jsonify, request
 from flask.json.provider import JSONProvider
 
@@ -13,8 +15,11 @@ app = Flask(__name__)
 #client = MongoClient('mongodb://test:test@localhost',27017)
 client = MongoClient('localhost', 27017)
 ACCESS_KEY='AKIAUVLHFO3JAY6XVO2F'
-SECRET_KEY='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'
-s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+S3SECRET_KEY='xGd36QoMpQqi+6WNxtQ48PM1uv6q8OhAkLcIuUNm'
+SECRET_KEY = 'SPARTA'
+
+
+s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=S3SECRET_KEY)
 
 db=client.yourname
 
@@ -36,15 +41,40 @@ class CustomJSONProvider(JSONProvider):
 
 app.json = CustomJSONProvider(app)
 
-@app.route('/login')
-def login():
-    pass
-
 @app.route('/')
 def main():
     return render_template('index.html') 
 
-@app.route('/vote', methods=['POST'])
+@app.route('/login')
+def login():
+    return render_template('login.html') 
+
+@app.route('/register')
+def register():
+    return render_template('register.html') 
+
+@app.route('/api/register', methods=['POST'])
+def api_register():
+    id_receive = request.form['id_give']
+    pw_receive = request.form['pw_give']
+    nickname_receive = request.form['nickname_give']
+
+    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+
+    db.user.insert_one({'email': id_receive, 'password': pw_receive, 'nickname': nickname_receive})
+
+    return jsonify({'result': 'success'})
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    id_receive = request.form['id_give']
+    pw_receive = request.form['pw_give']
+
+    pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
+
+    result = db.user.find_one({'email': id_receive, 'password': pw_hash})
+
+@app.route('/api/vote', methods=['POST'])
 def vote():
     state = request.form.get('state')
     email = request.form.get('email')
@@ -55,7 +85,7 @@ def vote():
     db.vote.insert_one(vote)
     return jsonify({'result':'success'})
 
-@app.route('/votes', methods=['GET'])
+@app.route('/api/votes', methods=['GET'])
 def votes():
     print("요청")
     lastSet = db.set.find_one(sort=[('timestamp', DESCENDING)])
@@ -79,7 +109,7 @@ def votes():
     print(result)
     return jsonify(result)
 
-@app.route('/stateImages/', methods=['GET'])
+@app.route('/api/stateImages/', methods=['GET'])
 def state_images():
     state = request.args.get('state','none')
     images = db.set.find({'state': state})
@@ -87,7 +117,7 @@ def state_images():
     result = {'result':'success'}
     return jsonify(result.update(image_urls))
 
-@app.route('/uploadImage', methods=['POST'])
+@app.route('/api/uploadImage', methods=['POST'])
 def upload_image():
     email=request.form['email']
     state=request.form['state']
@@ -105,7 +135,7 @@ def upload_image():
     else:
         return jsonify({'result': 'fail', 'error': 'No file uploaded'}), 400
 
-@app.route('/set', methods=['POST'])
+@app.route('/api/set', methods=['POST'])
 def set_temperature():
     email=request.form['email']
     temperature = request.form['temperature']

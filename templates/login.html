@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BBtree</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- icon -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+    <!-- font -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300&display=swap" rel="stylesheet">
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
+
+</head>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .signin {
+        width: 60%;
+        max-width: 960px; /* 16:9 aspect ratio */
+        background: orange;
+        color: white;
+        padding: 30px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .signin h1 {
+        font-size: 2em;
+        margin: 0;
+    }
+
+    .signin__card {
+        margin-top: 20px;
+    }
+
+    .signin__card h2 {
+        font-size: 1.5em;
+        margin: 0;
+    }
+
+    .signin__card input {
+        width: 100%;
+        margin: 10px 0;
+        padding: 10px;
+    }
+
+    .signin__card button {
+        padding: 5px 10px;
+        background: white;
+    }
+</style>
+<script>
+    {% if msg %}
+    alert("{{ msg }}")
+    {% endif %}
+    // ['쿠키'라는 개념에 대해 알아봅시다]
+    // 로그인을 구현하면, 반드시 쿠키라는 개념을 사용합니다.
+    // 페이지에 관계없이 브라우저에 임시로 저장되는 정보입니다. 키:밸류 형태(딕셔너리 형태)로 저장됩니다.
+    // 쿠키가 있기 때문에, 한번 로그인하면 네이버에서 다시 로그인할 필요가 없는 것입니다.
+    // 브라우저를 닫으면 자동 삭제되게 하거나, 일정 시간이 지나면 삭제되게 할 수 있습니다.
+    function login() {
+    $.ajax({
+        type: "POST",
+        url: "/api/login",
+        data: {id_give: $('#userid').val(), pw_give: $('#userpw').val()},
+        success: function (response) {
+            if (response['result'] == 'success') {
+                // 로그인이 정상적으로 되면, 토큰을 받아옵니다.
+                // 이 토큰을 mytoken이라는 키 값으로 쿠키에 저장합니다.
+                $.cookie('mytoken', response['token']);
+
+                alert('로그인 완료!')
+                window.location.href = '/index'
+            } else {
+                // 로그인이 안되면 에러메시지를 띄웁니다.
+                alert(response['msg'])
+            }
+        }
+    })
+    }
+
+</script>
+<body>
+    <div>
+        <section class="signin">
+            <h1>너의 온도는</h1>
+            <div class="signin__card">
+                <h2>
+                    <strong>로그인</strong> 
+                </h2>
+                <div>
+                    <input type="text" id="email" aria-describedby="emailHelp" placeholder="아이디를 입력하세요." />
+                    <input type="password" id="password" placeholder="비밀번호를 입력하세요." />
+                    <button class="material-symbols-outlined" >check_circle</button>
+                    <span for="idRemb">아이디 저장</span>
+                    <div>
+                        <button class="member" onclick="login()">로그인</button>
+                    </div>
+                    <p>
+                        * 회원가입해주세요
+                    </p>
+                    <div>
+                        <a class="member" href="register">회원 가입</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
