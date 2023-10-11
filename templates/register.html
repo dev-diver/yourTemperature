@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BBtree | 회원가입</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css" />
+    <!-- font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300&display=swap" rel="stylesheet">
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+</head>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .signin {
+        width: 60%;
+        max-width: 960px; /* 16:9 aspect ratio */
+        background: orange;
+        color: white;
+        padding: 30px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .signin h1 {
+        font-size: 2em;
+        margin: 0;
+    }
+
+    .signin__card {
+        margin-top: 20px;
+    }
+
+    .signin__card h2 {
+        font-size: 1.5em;
+        margin: 0;
+    }
+
+    .signin__card input {
+        width: 100%;
+        margin: 10px 0;
+        padding: 10px;
+    }
+
+    .signin__card button {
+        padding: 5px 10px;
+        background: white;
+    }
+</style>
+<script>
+    // 간단한 회원가입 함수입니다.
+    // 아이디, 비밀번호, 닉네임을 받아 DB에 저장합니다.
+    function register() {
+        $.ajax({
+            type: "POST",
+            url: "/api/register",
+            data: {
+                id_give: $('#email').val(),
+                pw_give: $('#password').val(),
+                nickname_give: $('#nickname').val()
+            },
+            success: function (response) {
+                if (response['result'] == 'success') {
+                    alert('회원가입이 완료되었습니다.')
+                    window.location.href = '/login'
+                } else {
+                    alert(response['msg'])
+                }
+            }
+        })
+    }
+    </script>
+<body>
+    <div>
+        <!-- Sign Up -->
+        <section class="signin">
+            <h1>너의 온도는</h1>
+            <div class="signin__card">
+                <h2>
+                    <strong>[회원가입]</strong> 
+                </h2>
+                <div>
+                    <input type="text" id="email" placeholder="아이디를 입력하세요." />
+                    <p>
+                        * 아이디는 1-15자의 영문과 숫자와 일부특수문자(._-)만 입력 가능합니다.
+                    </p>
+                    <input type="password" id="password" placeholder="비밀번호를 입력하세요." />
+                    <p>
+                        * 영문과 숫자 조합의 8-20자의 비밀번호를 설정해주세요.
+                    </p>
+                    <input type="text" id="nickname" placeholder="닉네임을 입력하세요." />
+                    <button class="member" onclick="register()">가입하기</button>
+                    <a class="member 2"  href="/login">취소</a>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
