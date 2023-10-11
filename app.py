@@ -109,7 +109,7 @@ def votes():
     print(result)
     return jsonify(result)
 
-@app.route('/api/stateImages/', methods=['GET'])
+@app.route('/api/stateImages', methods=['GET'])
 def state_images():
     state = request.args.get('state','none')
     images = db.set.find({'state': state})
@@ -124,9 +124,9 @@ def upload_image():
     file = request.files['file']
     if file:
         # S3에 파일 업로드
-        s3_client.upload_fileobj(file, 'krafton_yourname', file.filename)
+        s3_client.upload_fileobj(file, 'krafton_yourname', file.filename+'1')
         # S3 파일 URL 생성
-        file_url = f"https://krafton_yourname.s3.amazonaws.com/{file.filename}"
+        file_url = f"https://krafton_yourname.s3.amazonaws.com/{file.filename+'1'}"
 
         doc = {'email':email,'state':state,'image_url': file_url}
         db.image.insert_one(doc)
