@@ -40,7 +40,7 @@
     .signin {
         width: 60%;
         max-width: 960px; /* 16:9 aspect ratio */
-        background: orange;
+        background: skyblue;
         color: white;
         padding: 30px;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
@@ -84,15 +84,14 @@
     $.ajax({
         type: "POST",
         url: "/api/login",
-        data: {id_give: $('#userid').val(), pw_give: $('#userpw').val()},
+        data: {id_give: $('#email').val(), pw_give: $('#password').val()},
         success: function (response) {
             if (response['result'] == 'success') {
                 // 로그인이 정상적으로 되면, 토큰을 받아옵니다.
                 // 이 토큰을 mytoken이라는 키 값으로 쿠키에 저장합니다.
                 $.cookie('mytoken', response['token']);
-
                 alert('로그인 완료!')
-                window.location.href = '/index'
+                window.location.href = '/'
             } else {
                 // 로그인이 안되면 에러메시지를 띄웁니다.
                 alert(response['msg'])
@@ -113,8 +112,6 @@
                 <div>
                     <input type="text" id="email" aria-describedby="emailHelp" placeholder="아이디를 입력하세요." />
                     <input type="password" id="password" placeholder="비밀번호를 입력하세요." />
-                    <button class="material-symbols-outlined" >check_circle</button>
-                    <span for="idRemb">아이디 저장</span>
                     <div>
                         <button class="member" onclick="login()">로그인</button>
                     </div>

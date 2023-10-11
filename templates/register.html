@@ -37,7 +37,7 @@
     .signin {
         width: 60%;
         max-width: 960px; /* 16:9 aspect ratio */
-        background: orange;
+        background: skyblue;
         color: white;
         padding: 30px;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
@@ -78,7 +78,8 @@
             data: {
                 id_give: $('#email').val(),
                 pw_give: $('#password').val(),
-                nickname_give: $('#nickname').val()
+                nickname_give: $('#nickname').val(),
+                profile_give: $('#profile').val()
             },
             success: function (response) {
                 if (response['result'] == 'success') {
@@ -110,6 +111,7 @@
                         * 영문과 숫자 조합의 8-20자의 비밀번호를 설정해주세요.
                     </p>
                     <input type="text" id="nickname" placeholder="닉네임을 입력하세요." />
+                    <input type="file" id="profile" name="profile" accept="image/*">
                     <button class="member" onclick="register()">가입하기</button>
                     <a class="member 2"  href="/login">취소</a>
                 </div>
