@@ -1,53 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>너의 온도는</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css" />
+{% extends "base.html" %}
+{% block script %}
+    <script src="{{ url_for('login_js') }}"></script>
+{% endblock %}
+{% block style %}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <!-- icon -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
-    <!-- font -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+{% endblock %}
+{% block font %}
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300&display=swap" rel="stylesheet">
-
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- Bulma CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
-    <!-- JS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
-    <script src="{{ url_for('login_js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-
-</head>
-<body>
-    <div>
-        <section class="signin">
-            <h1>너의 온도는</h1>
-            <div class="signin__card">
-                <h2>
-                    <strong>로그인</strong> 
-                </h2>
+{% endblock %}
+{% block body %}
+<div>
+    <section class="signin">
+        <h1>너의 온도는</h1>
+        <div class="signin__card">
+            <h2>
+                <strong>로그인</strong> 
+            </h2>
+            <div>
+                <input type="text" id="email" aria-describedby="emailHelp" placeholder="아이디를 입력하세요." />
+                <input type="password" id="password" placeholder="비밀번호를 입력하세요." />
                 <div>
-                    <input type="text" id="email" aria-describedby="emailHelp" placeholder="아이디를 입력하세요." />
-                    <input type="password" id="password" placeholder="비밀번호를 입력하세요." />
-                    <div>
-                        <button class="member" onclick="login()">로그인</button>
-                    </div>
-                    <p>
-                        * 회원가입해주세요
-                    </p>
-                    <div>
-                        <a class="member" href="register">회원 가입</a>
-                    </div>
+                    <button class="member" onclick="login()">로그인</button>
+                </div>
+                <p>
+                    * 회원가입해주세요
+                </p>
+                <div>
+                    <a class="member" href="register">회원 가입</a>
                 </div>
             </div>
-        </section>
-    </div>
-</body>
-</html>
+        </div>
+    </section>
+</div>
+{% endblock %}

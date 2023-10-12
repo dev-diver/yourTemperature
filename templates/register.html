@@ -1,52 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>너의 온도는</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css" />
-    <!-- font -->
+{% extends "base.html" %}
+{% block script %}
+    <script src={{ url_for('static', filename='js/register.js') }}></script>
+{% endblock %}
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+{% endblock %}
+{% block font %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300&display=swap" rel="stylesheet">
-
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bulma CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
-    <!-- JS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
-    <script src={{ url_for('static', filename='js/register.js') }}></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
-</head>
-<body>
-    <div>
-        <!-- Sign Up -->
-        <section class="signin">
-            <h1>너의 온도는</h1>
-            <div class="signin__card">
-                <h2>
-                    <strong>[회원가입]</strong> 
-                </h2>
-                <div>
-                    <form id="uploadForm" enctype="multipart/form-data"></form>
-                        <input type="text" id="email" name="email" placeholder="아이디를 입력하세요." />
-                        <p>
-                            * 메일형식만 입력 가능합니다.
-                        </p>
-                        <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요." />
-                        <input type="text" id="nickname" name="nickname" placeholder="닉네임을 입력하세요." />
-                        <input type="file" id="profile" name="file" accept="image/*">
-                        <button class="member" onclick="register()">가입하기</button>
-                    </form>
-                    <a class="member 2"  href="/login">취소</a>
-                </div>
+{% endblock %}
+{% block body %}
+<div>
+    <!-- Sign Up -->
+    <section class="signin">
+        <h1>너의 온도는</h1>
+        <div class="signin__card">
+            <h2>
+                <strong>[회원가입]</strong> 
+            </h2>
+            <div>
+                <form id="uploadForm" enctype="multipart/form-data"></form>
+                    <input type="text" id="email" name="email" placeholder="아이디를 입력하세요." />
+                    <p>
+                        * 메일형식만 입력 가능합니다.
+                    </p>
+                    <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요." />
+                    <input type="text" id="nickname" name="nickname" placeholder="닉네임을 입력하세요." />
+                    <input type="file" id="profile" name="file" accept="image/*">
+                    <button class="member" onclick="register()">가입하기</button>
+                </form>
+                <a class="member 2"  href="/login">취소</a>
             </div>
-        </section>
-    </div>
-</body>
-</html>
+        </div>
+    </section>
+</div>
+{% endblock %}
