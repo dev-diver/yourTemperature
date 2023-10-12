@@ -5,15 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <title>너의 온도는</title>
 
     <script>
-        $(document).ready(function () {
-            // index.html 로딩이 완료되면 자동으로 showState() 함수를 호출
-            showState();
-        });
+        let user;
         let votes;  //처음에 가져오는 투표결과들
         let uploadImageState = 'none' //아무것도 없을 때 이미지 상태
+
+        $(document).ready(function () {
+            let user = $.cookie('user')
+            showState();
+
+            $('#setForm').on('submit', function(e) {
+                e.preventDefault();  // Prevents the form from submitting the traditional way
+                let temperature = $('#temperature').val();
+                changeTemperature(temperature);
+            });
+        });
 
         function showState() {
             $.ajax({
@@ -22,7 +31,6 @@
                 data: {},
                 success: function (response) {
                     votes = response
-                    console.log(votes)
                     show_profile('hot')
                     show_profile('good')
                     show_profile('cold')
@@ -32,7 +40,8 @@
         }
         function show_profile(state) {
             for (let i = 0; i < votes[state].length; i++) {
-                console.log(votes[state][i])
+                url=votes[state][i]['img_url']
+                $(`#${state} > .profiles`).append(`<img class="profile" src=${url}>`);
             }
 
         }
@@ -43,11 +52,6 @@
                 data : {'state' : state },
                 success : function(response){
                     img_url = response['image_url']
-                    console.log(img_url)
-                    // $('#cliamateImage').attr('src',img_url)
-                    //이미지 들어갈 태그를 아이디로 찾아서
-                    //imgsrc = imgurl
-                    // 여기에 state에 대응되는 사진이 나오도록 구현해야 됨
                     const imageElement = document.getElementById('climateImage');
                     imageElement.src = img_url;                
                 }
@@ -58,7 +62,7 @@
             $.ajax({
                 type: 'POST',
                 url: '/api/vote',
-                data: JSON.stringify({ "state": newState , "email" : "wjdtka1325@naver.com" }),
+                data: JSON.stringify({ "state": newState , "email" : user['email'] }),
                 contentType: 'application/json',
                 success: function (response) {
                     if (response['result'] == 'success') {
@@ -70,7 +74,7 @@
         }
         function uploadFile() {
             var formData = new FormData($('#uploadForm')[0]);
-            formData.append('email','valen@gmail.com')
+            formData.append('email',user['email'])
             formData.append('state',uploadImageState)
             console.log("전송", formData)
             $.ajax({
@@ -94,21 +98,58 @@
         function handleFileSelect(state) {
             uploadImageState = state
             console.log(uploadImageState)
+            $('#uploadForm').css('display', 'block');
         }
+
         function showPop() {
-            var pop = document.getElementById('pop');
+            var pop = document.getElementById('climatePop');
             pop.style.display = 'block'; // 요소를 보이게 만듭니다.
+            uploadImageState = 'none'
+            $('#uploadForm').css('display', 'none');
         }
+
         function hidePop() {
-            var pop = document.getElementById('pop');
+            var pop = document.getElementById('climatePop');
             pop.style.display = 'none'; // 요소를 숨깁니다
+        }
+
+        function showSet() {
+            $('#setPop').css('display','block')
+        }
+
+        function hideSet() {
+            $('#setPop').css('display','none')
+        }
+
+        function changeTemperature(temperature){
+            $.ajax({
+                type: 'POST',
+                url: '/api/set',
+                data: {
+                    "email" : user['email'],
+                    "temperature": temperature
+                },
+                contentType: 'application/json',
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert('설정 완료')
+                        window.location.reload()                       
+                    }
+                }
+            });
         }
     </script>
 
     <style>
+        #container {
+            width: 400px;
+            margin: 0 auto;
+            text-align: center;
+            position:relative;
+        }
+
         #climateImage {
             width: 400px;
-
         }
 
         .upload {
@@ -119,9 +160,14 @@
         }
 
         .popup {
-            position: fixed;
-            top: 100px;
-            left: 100px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 20%; /* or whatever height you desire */
+            width: 70%;  /* or whatever width you desire */
+            margin: auto;
             background: rgba(0, 0, 0, 0.5);
             display: flex;
             justify-content: center;
@@ -129,34 +175,76 @@
             z-index: 999;
             display: none;
         }
+
+        .votes {
+            display: flex;
+            flex-direction: row;
+        }
+        
+        .vote {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;  /* Optional: To center align items vertically */
+        }
+
+        .profile {
+            width:30px;
+        }
     </style>
 </head>
 
 <body>
-    <h2>현재 정글의 기상상태</h2>
     <div id="container">
+        <h2>현재 정글의 기상상태</h2>
         <div>
-            <img id="climateImage" src=""
-                alt="">
+            <img id="climateImage" src="" alt="">
         </div>
-        <button onclick="showPop()">이미지 업로드</button>
+        <button onclick="showSet()">바꿨음</button>
+        <button onclick="showPop()">[+]</button>
         <br>
-        <button id="hotButton" onclick="updateState('hot')">Hot</button> <button id="goodButton"
-            onclick="updateState('good')">Good</button>
-        <button id="coldButton" onclick="updateState('cold')">Cold</button>
-    </div>
-    <div id="pop" class="popup">
-        <button onClick="handleFileSelect('hot')">HOT</button>
-        <button onClick="handleFileSelect('good')">GOOD</button>
-        <button onClick="handleFileSelect('none')">COLD</button>
-        <div>
-            <button onclick="hidePop()">뒤로 가기</button>
+        <div class="votes">
+            <div id="hot" class="vote">
+                <button id="hotButton" onclick="updateState('hot')">Hot</button>
+                <div class ="profiles">
+                </div>
+            </div>
+            <div id="good" class="vote">
+                <button id="goodButton" onclick="updateState('good')">Good</button>
+                <div class ="profiles">
+                </div>
+            </div>
+            <div id="cold" class="vote">
+                <button id="coldButton" onclick="updateState('cold')">Cold</button>
+                <div class ="profiles">
+                </div>
+            </div>
         </div>
-        <form id="uploadForm" enctype="multipart/form-data">
-            <input type="file" id="imageFile" name="file">
-            <input type="button" value="Upload" onclick="uploadFile()">
-        </form>
+        <div id="climatePop" class="popup">
+            <div>
+                <button onclick="hidePop()">닫기</button>
+            </div>
+            <button onClick="handleFileSelect('hot')">HOT</button>
+            <button onClick="handleFileSelect('good')">GOOD</button>
+            <button onClick="handleFileSelect('none')">COLD</button>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" id="imageFile" name="file">
+                <input type="button" value="Upload" onclick="uploadFile()">
+            </form>
+        </div>
+        <div id="setPop" class="popup">
+            <div>
+                <button onclick="hideSet()">닫기</button>
+            </div>
+            <form id="setForm">
+                <label for="temperature">설정 온도:</label>
+                <input type="number" id="temperature" name="temperature" required>
+                <input type="submit" value="바꿈!">
+            </form>
+        </div>
     </div>
+    
+    
 </body>
 
 </html>
