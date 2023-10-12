@@ -160,6 +160,7 @@
         }
 
         function changeTemperature(temperature) {
+            console.log(user)
             $.ajax({
                 type: 'POST',
                 url: '/api/set',

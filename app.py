@@ -230,21 +230,25 @@ def upload_image():
 
 @app.route('/api/set', methods=['POST'])
 def set_temperature():
-    email=request.form['email']
-    temperature = request.form['temperature']
-
-    user = db.login.find_one({'email',email})
-    nickname = user['nickname'] or '이름없음'
-    profile = user['profile'] or base_profile_url
+    email=request.form.get('email')
+    temperature = request.form.get('temperature')
     timestamp = datetime.utcnow()
-    set = {
+    user = {
         'email':email,
         'temperature':temperature,
-        'nickname':nickname,
-        'profile':profile,
+        'nickname':'이름없음',
+        'profile':base_profile_url,
         'timestamp':timestamp
     }
-    db.set.insert_one(set)
+    try:
+        userDoc = db.login.find_one({'email',email})
+        user.update({
+            'nickname':user['nickname'],
+            'profile':user['profile'],
+        })
+    except:
+        return jsonify({'result':'fail'})
+    db.set.insert_one(user)
     result = {'result':'success'}
     return jsonify(result)
 
