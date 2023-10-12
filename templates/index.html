@@ -31,9 +31,9 @@
             });
 
             $(document).on('mouseenter', '.profile-container', function(){
-                alert('Mouse Over');
+                $(this).find('.message').css('display','block')
             }).on('mouseleave', '.profile-container', function(){
-                alert('Mouse Out');
+                $(this).find('.message').css('display','none')
             });
         });
 
@@ -56,11 +56,18 @@
         function show_profile(state) {
             for (let i = 0; i < votes[state].length; i++) {
                 url = votes[state][i]['img_url']
-                message = votes[state][i]['message']
+                stateMsg ={
+                    'hot' : '추웡',
+                    'good' : '좋앙',
+                    'cold' : '더웡'
+                }
+                voteMsg = votes[state][i]['message']
+                message = voteMsg=="" ? stateMsg[state]:voteMsg
+                console.log(voteMsg,stateMsg[state])
                 html_template = `
                     <div class="profile-container">
                         <img class="profile" src=${url}>
-                        <span class="hide">${message}</span>
+                        <span class="message hide">${message}</span>
                     </div>
                 `
                 $(`#${state} > .profiles`).append(html_template);
