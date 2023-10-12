@@ -243,16 +243,20 @@ def get_js_timestamp():
     return js_timestamp
 
 def getUserByEmail(email):
+    user = {
+        'nickname':'이름없음',
+        'profile': base_profile_url
+    }
     try:
         userDoc = db.login.find_one({'email',email})
+        nickname = userDoc['nickname']
+        profile = userDoc['profile']
+        user = {
+            'nickname':nickname,
+            'profile':profile
+        }
     except:
         print("해당 email 없음")
-    nickname = userDoc['nickname'] or '이름없음'
-    profile = userDoc['profile'] or base_profile_url
-    user = {
-        'nickname':nickname,
-        'profile':profile
-    }
     return user
 
 if __name__ == '__main__':
