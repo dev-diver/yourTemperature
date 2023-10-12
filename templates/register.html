@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BBtree | 회원가입</title>
+    <title>너의 온도는</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css" />
     <!-- font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,8 +76,8 @@
             type: "POST",
             url: "/api/register",
             data: {
-                id_give: $('#email').val(),
-                pw_give: $('#password').val(),
+                email_give: $('#email').val(),
+                password_give: $('#password').val(),
                 nickname_give: $('#nickname').val(),
                 profile_give: $('#profile').val()
             },

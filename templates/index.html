@@ -39,6 +39,17 @@
 
         
 
+        $(document).ready(function () {
+            let user = $.cookie('user')
+            showState();
+
+            $('#setForm').on('submit', function(e) {
+                e.preventDefault();  // Prevents the form from submitting the traditional way
+                let temperature = $('#temperature').val();
+                changeTemperature(temperature);
+            });
+        });
+
         function showState() {
             $.ajax({
                 type: "GET",
