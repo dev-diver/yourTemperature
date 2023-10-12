@@ -13,11 +13,22 @@
         let votes;  //처음에 가져오는 투표결과들
         let uploadImageState = 'none' //아무것도 없을 때 이미지 상태
         let voteState = 'none'
+        stateMsg ={
+            'hot' : '추워요',
+            'good' : '적당해요',
+            'cold' : '더워요'
+        }
+        stateCuteMsg ={
+            'hot' : '추웡',
+            'good' : '좋앙',
+            'cold' : '더웡'
+        }
 
         $(document).ready(function () {
             let token = $.cookie('token')
-            let user = $.cookie('user')
-            console.log(token, user)
+            let user = JSON.parse($.cookie('user'))
+            console.log(user)
+            console.log(user['email'],user['nickname'])
             showState();
 
             $('#setForm').on('submit', function(e) {
@@ -39,19 +50,12 @@
             });
         });
 
+        function logout(){
+            $.removeCookie('user');
+            $.removeCookie('token');
+            window.location.href="/login"
+        }
         
-
-        $(document).ready(function () {
-            let user = $.cookie('user')
-            showState();
-
-            $('#setForm').on('submit', function(e) {
-                e.preventDefault();  // Prevents the form from submitting the traditional way
-                let temperature = $('#temperature').val();
-                changeTemperature(temperature);
-            });
-        });
-
         function showState() {
             $.ajax({
                 type: "GET",
@@ -63,19 +67,25 @@
                     show_profile('good')
                     show_profile('cold')
                     show_climate(votes['most'])
+                    showStateMessage()
                 }
             })
         }
+
+        function showStateMessage(){
+            let most = votes['most']
+            let messages = votes[most]
+            var randomIndex = Math.floor(Math.random() * messages.length);
+            let message = messages[randomIndex]['message']
+            message = message !=''? message : stateMsg[most]
+            $('#climateMessage').text(message)
+        }
+
         function show_profile(state) {
             for (let i = 0; i < votes[state].length; i++) {
                 url = votes[state][i]['img_url']
-                stateMsg ={
-                    'hot' : '추웡',
-                    'good' : '좋앙',
-                    'cold' : '더웡'
-                }
                 voteMsg = votes[state][i]['message']
-                message = voteMsg=="" ? stateMsg[state]:voteMsg
+                message = voteMsg=="" ? stateCuteMsg[state]:voteMsg
                 console.log(voteMsg,stateMsg[state])
                 html_template = `
                     <div class="profile-container">
@@ -255,6 +265,8 @@
 <body>
     <div id="container">
         <h2>현재 정글의 기상상태</h2>
+        <h3 id="climateMessage"></h3>
+        <div onclick="logout()">로그아웃</div>
         <div>
             <img id="climateImage" src="" alt="">
         </div>

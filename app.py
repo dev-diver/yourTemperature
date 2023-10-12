@@ -4,7 +4,7 @@ import boto3
 
 from jwt.exceptions import ExpiredSignatureError
 import hashlib
-from flask import Flask, render_template, jsonify, request,url_for, redirect
+from flask import Flask, render_template, jsonify, request,url_for, redirect, make_response
 from flask.json.provider import JSONProvider
 
 from datetime import datetime, timedelta
@@ -58,22 +58,11 @@ def main():
     try:
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         user_info = db.user.find_one({"email": payload["email"]})
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> main
         if user_info is not None:
             nickname = user_info.get("nickname", "Guest")
         else:
             nickname = "Guest"
-
         return render_template('index.html', nickname=nickname)
-<<<<<<< HEAD
-=======
-        return render_template('index.html', nickname=user_info["nickname"])
->>>>>>> main
-=======
->>>>>>> main
     except jwt.ExpiredSignatureError:
         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
     except jwt.exceptions.DecodeError:
@@ -106,49 +95,31 @@ def api_login():
     password_receive = request.form['password_give']
 
     password_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()
-
-<<<<<<< HEAD
-<<<<<<< HEAD
     userDoc = db.user.find_one({'email': email_receive})
+    if(not userDoc):
+        return jsonify({'result': 'fail', 'msg': '아이디가 없습니다'})
     isLogin = password_hash == userDoc['password']
     if userDoc is not None and isLogin:
-=======
-    result = db.user.find_one({'email': email_receive})
-    if(password_hash == result['password']):
-        print(result)
-    if result is not None:
->>>>>>> main
-=======
-    userDoc = db.user.find_one({'email': email_receive})
-    isLogin = password_hash == userDoc['password']
-    if userDoc is not None and isLogin:
->>>>>>> main
         # JWT 토큰에는, payload와 시크릿키가 필요합니다.
         # 시크릿키가 있어야 토큰을 디코딩(=풀기) 해서 payload 값을 볼 수 있습니다.
         # 아래에선 email와 exp를 담았습니다. 즉, JWT 토큰을 풀면 유저email 값을 알 수 있습니다.
         # exp에는 만료시간을 넣어줍니다(5초). 만료시간이 지나면, 시크릿키로 토큰을 풀 때 만료되었다고 에러가 납니다.
         payload = {
             'email': email_receive,
-<<<<<<< HEAD
-<<<<<<< HEAD
             'nickname':userDoc['nickname'],
             'profile':userDoc['profile'],
-=======
->>>>>>> main
-=======
-            'nickname':userDoc['nickname'],
-            'profile':userDoc['profile'],
->>>>>>> main
             'exp': datetime.utcnow() + timedelta(days=1)
                     }
         token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
         user = {
             'email':email_receive,
-            'nickname':result['nickname'],
-            'profile':result['profile'],
+            'nickname':userDoc['nickname'],
+            'profile':userDoc['profile'],
         }
         # token을 줍니다.
-        return jsonify({'result': 'success', 'token': token, 'user':user})
+        response = {'result': 'success', 'token': token}
+        response.update(user)
+        return jsonify(response)
     # 찾지 못하면
     else:
         return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
@@ -302,4 +273,4 @@ def getUserByEmail(email):
     return user
 
 if __name__ == '__main__':
-    app.run(port=5002,debug=True)
+    app.run(port=5000,debug=True)
