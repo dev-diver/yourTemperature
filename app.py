@@ -82,10 +82,14 @@ def api_register():
     password = request.form['password']
     nickname = request.form['nickname']
     print(request.files)
-    file = request.files['file']
+    file = None
+    try:
+        file = request.files['file']
+    except Exception as e:
+        print(e)
 
     password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
-
+    file_url = base_profile_url
     if file:
         #TODO:S3 서버 장애시 대응
         filename = f'profile{email}'
