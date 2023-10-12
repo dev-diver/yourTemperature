@@ -98,7 +98,9 @@
                 console.log(voteMsg, stateMsg[state])
                 html_template = `
                     <div class="profile-container column is-6">
-                        <img class="profile" src=${url}>
+                        <figure class="image is-48x48">
+                        <img class="profile is-rounded" src=${url}>
+                        </figure>
                         <span class="message hide">${message}</span>
                     </div>
                 `
