@@ -121,7 +121,7 @@
                     let img_url = response['img_url']
                     $('#climateImage').attr('src',img_url)
                     let text = ""
-                    if (response['nickname']!=""){
+                    if (response['nickname']!=undefined){
                         text = response['nickname']+ ' 님 제공'
                     }
                     console.log(text)
