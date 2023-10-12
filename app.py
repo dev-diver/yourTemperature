@@ -185,13 +185,12 @@ def votes():
         states = {'hot':len(hot),'good':len(good),'cold':len(cold)}
         max_state = max(states, key=lambda k: states[k])
         print('hot',len(hot),"cold",len(cold),'good',len(good),max_state)
-        if(len(hot)==len(cold)): 
+        if(len(hot)==len(good) or len(hot)==len(cold)): 
             max_state = 'good'
-            print(max_state)
-        if(len(hot)==len(good) and len(cold)==len(good)): 
-            max_state = 'good'
-            if(len(hot)==0):
-                max_state='none'
+        if(len(hot)==0 and len(good)==0 and len(cold)==0):
+            max_state = 'none'
+        print(max_state)
+
     except Exception as e:
         print("실패",e)
         return jsonify({'result':'fail'}), 400
@@ -223,7 +222,11 @@ def state_images():
         print("실패",e)
         result = {'result':'fail'}
         result.update(image)
-        return jsonify({'result':'fail','img_url':image['img_url']})
+        return jsonify({
+            'result':'fail',
+            'img_url':image['img_url'],
+            'nickname':image['nickname']
+        })
     result = {'result':'success'}
     result.update(image)
     return jsonify(result)

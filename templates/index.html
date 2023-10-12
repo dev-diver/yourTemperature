@@ -120,9 +120,14 @@
                 url: `/api/stateImages?state=${state}`,
                 success: function (response) {
                     console.log(response)
-                    img_url = response['img_url']
-                    const imageElement = document.getElementById('climateImage');
-                    imageElement.src = img_url;
+                    let img_url = response['img_url']
+                    $('#climateImage').attr('src',img_url)
+                    let text = ""
+                    if (response['nickname']!=undefined){
+                        text = response['nickname']+ ' 님 제공'
+                    }
+                    console.log(text)
+                    $('#climateImageUser').text(text)
                 }
             })
         }
@@ -304,6 +309,7 @@
         <div class="has-text-right"><button class="button" onclick="logout()">로그아웃</button></div>
         <div>
             <img id="climateImage" src="" alt="">
+            <p id="climateImageUser"></p>
         </div>
         <button onclick="showSet()" class="button is-danger is-outlined">
             <span class="icon is-small">
