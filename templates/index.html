@@ -7,6 +7,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <title>너의 온도는</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
 
     <script>
         let user;
@@ -31,7 +34,7 @@
             console.log(user['email'],user['nickname'])
             showState();
 
-            $('#setForm').on('submit', function(e) {
+            $('#setForm').on('submit', function (e) {
                 e.preventDefault();  // Prevents the form from submitting the traditional way
                 let temperature = $('#temperature').val();
                 changeTemperature(temperature);
@@ -82,30 +85,38 @@
         }
 
         function show_profile(state) {
+            console.log(votes)
             for (let i = 0; i < votes[state].length; i++) {
                 url = votes[state][i]['img_url']
                 voteMsg = votes[state][i]['message']
                 message = voteMsg=="" ? stateCuteMsg[state]:voteMsg
                 console.log(voteMsg,stateMsg[state])
                 html_template = `
-                    <div class="profile-container">
+                    <div class="profile-container column is-6">
                         <img class="profile" src=${url}>
                         <span class="message hide">${message}</span>
                     </div>
                 `
                 $(`#${state} > .profiles`).append(html_template);
+                row = parseInt(i/2)
+                mod = i%2
+                console.log(row, mod)
+                if(mod==0){
+                    $(`#${state} > .profiles`).append(`<div id=${state}${row} class="columns"></div>`)
+                }
+                $(`#${state}${row}`).append(html_template);
             }
 
         }
         function show_climate(state) {
             $.ajax({
-                type : "GET",
-                url : "/api/stateImages",
-                data : {'state' : state },
-                success : function(response){
+                type: "GET",
+                url: "/api/stateImages",
+                data: { 'state': state },
+                success: function (response) {
                     img_url = response['image_url']
                     const imageElement = document.getElementById('climateImage');
-                    imageElement.src = img_url;                
+                    imageElement.src = img_url;
                 }
             })
         }
@@ -114,12 +125,12 @@
             $.ajax({
                 type: 'POST',
                 url: '/api/vote',
-                data: JSON.stringify({ "state": newState , "email" : user['email'] }),
+                data: JSON.stringify({ "state": newState, "email": user['email'] }),
                 contentType: 'application/json',
                 success: function (response) {
                     if (response['result'] == 'success') {
                         alert('투표 완료')
-                        window.location.reload()                       
+                        window.location.reload()
                     }
                 }
             });
@@ -127,8 +138,8 @@
 
         function uploadFile() {
             var formData = new FormData($('#uploadForm')[0]);
-            formData.append('email',user['email'])
-            formData.append('state',uploadImageState)
+            formData.append('email', user['email'])
+            formData.append('state', uploadImageState)
             console.log("전송", formData)
             $.ajax({
                 url: '/api/uploadImage',
@@ -185,11 +196,11 @@
         }
 
         function showSet() {
-            $('#setPop').css('display','block')
+            $('#setPop').css('display', 'block')
         }
 
         function hideSet() {
-            $('#setPop').css('display','none')
+            $('#setPop').css('display', 'none')
         }
 
         function showMsgInput(state){
@@ -204,11 +215,11 @@
     </script>
 
     <style>
-        #container {
+        .container {
             width: 400px;
             margin: 0 auto;
             text-align: center;
-            position:relative;
+            position: relative;
         }
 
         #climateImage {
@@ -228,8 +239,10 @@
             left: 0;
             right: 0;
             bottom: 0;
-            height: 20%; /* or whatever height you desire */
-            width: 70%;  /* or whatever width you desire */
+            height: 20%;
+            /* or whatever height you desire */
+            width: 50%;
+            /* or whatever width you desire */
             margin: auto;
             background: rgba(0, 0, 0, 0.5);
             display: flex;
@@ -243,74 +256,88 @@
             display: flex;
             flex-direction: row;
         }
-        
+
         .vote {
             flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;  /* Optional: To center align items vertically */
+            align-items: center;
+            /* Optional: To center align items vertically */
         }
 
         .profile {
-            width:30px;
-        }
-
-        .hide {
-            display: none;
+            width: 30px;
         }
 
     </style>
 </head>
 
 <body>
-    <div id="container">
-        <h2>현재 정글의 기상상태</h2>
+    <div class="container">
+        <h2 class="title is-2" style="margin-top: 30px;">현재 정글의 기상상태</h2>
         <h3 id="climateMessage"></h3>
         <div onclick="logout()">로그아웃</div>
         <div>
             <img id="climateImage" src="" alt="">
         </div>
-        <button onclick="showSet()">바꿨음</button>
-        <button onclick="showPop()">[+]</button>
+        <button onclick="showSet()" class="button is-danger is-outlined">
+            <span class="icon is-small">
+                <ion-icon name="thermometer-outline"></ion-icon>
+            </span>
+            <span>온도 설정</span>
+        </button>
+        <button class="button is-info is-outlined" onclick="showPop()">
+            <span class="icon is-small">
+                <ion-icon name="cloud-upload-outline"></ion-icon>
+            </span>
+            <span>사진 업로드</span>
+        </button>
         <br>
-        <div class="votes">
-            <div id="hot" class="vote">
-                <button id="hotButton" onclick="showMsgInput('hot')">Hot</button>
-                <div class ="profiles">
+        <br>
+        <br>
+        <div class="columns">
+            <div id="hot" class="column is-one-third">
+                <button class="button is-danger is-medium" onclick="showMsgInput('hot')">Hot</button>
+                <div class="profiles">
                 </div>
             </div>
-            <div id="good" class="vote">
-                <button id="goodButton" onclick="showMsgInput('good')">Good</button>
-                <div class ="profiles">
+            <div id="good" class="column">
+                <button class="button is-success is-medium" onclick="showMsgInput('good')" >Good</button>
+                <div class="profiles">
                 </div>
             </div>
-            <div id="cold" class="vote">
-                <button id="coldButton" onclick="showMsgInput('cold')">Cold</button>
-                <div class ="profiles">
+            <div id="cold" class="column ">
+                <button class="button is-link is-medium" onclick="showMsgInput('cold')">Cold</button>
+                <div class="profiles">
                 </div>
             </div>
         </div>
         <div id="climatePop" class="popup">
-            <div>
-                <button onclick="hidePop()">닫기</button>
+            <div style="margin-bottom: 5px; text-align: right ;">
+                <button onclick="hidePop()" class="button"><ion-icon name="close-outline" size = "large" style="color: red;"></ion-icon></button>
             </div>
-            <button onClick="handleFileSelect('hot')">HOT</button>
-            <button onClick="handleFileSelect('good')">GOOD</button>
-            <button onClick="handleFileSelect('none')">COLD</button>
+            <div style="margin-bottom: 20px;">
+                <button class="button is-danger is-small" onClick="handleFileSelect('hot')">HOT</button>
+                <button class="button is-success is-small" onClick="handleFileSelect('good')">GOOD</button>
+                <button class="button is-link is-small" onClick="handleFileSelect('none')">COLD</button>
+            </div>
             <form id="uploadForm" enctype="multipart/form-data">
                 <input type="file" id="imageFile" name="file">
                 <input type="button" value="Upload" onclick="uploadFile()">
             </form>
         </div>
         <div id="setPop" class="popup">
-            <div>
-                <button onclick="hideSet()">닫기</button>
+            <div style="text-align: right;">
+                <button onclick="hideSet()" class="button"><ion-icon name="close-outline" size = "large" style="color: red;""></ion-icon></button>
             </div>
-            <form id="setForm">
-                <label for="temperature">설정 온도:</label>
-                <input type="number" id="temperature" name="temperature" required>
-                <input type="submit" value="바꿈!">
-            </form>
+            <div style="text-align: center;">
+                <form id="setForm">
+                    <label for="temperature"><strong style="color: white;">설정 온도:</strong></label>
+                    <input class="input is-small" type="number" id="temperature" name="temperature" required
+                        style="width: 60px;">
+                    <input type="submit" value="바꿈!">
+                </form>
+            </div>
         </div>
         <div id="msgInputPop" class="popup">
             <div>
@@ -324,6 +351,8 @@
         </div>
     </div>
 
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
 
 </html>
