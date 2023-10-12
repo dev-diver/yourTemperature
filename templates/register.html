@@ -20,92 +20,9 @@
     <!-- JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <script src={{ url_for('static', filename='js/register.js') }}></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
 </head>
-<style>
-    * {
-        box-sizing: border-box;
-    }
-
-    body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-    }
-
-    .signin {
-        width: 60%;
-        max-width: 960px; /* 16:9 aspect ratio */
-        background: skyblue;
-        color: white;
-        padding: 30px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .signin h1 {
-        font-size: 2em;
-        margin: 0;
-    }
-
-    .signin__card {
-        margin-top: 20px;
-    }
-
-    .signin__card h2 {
-        font-size: 1.5em;
-        margin: 0;
-    }
-
-    .signin__card input {
-        width: 100%;
-        margin: 10px 0;
-        padding: 10px;
-    }
-
-    .signin__card button {
-        padding: 5px 10px;
-        background: white;
-    }
-</style>
-<script>
-    // 간단한 회원가입 함수입니다.
-    // 아이디, 비밀번호, 닉네임을 받아 DB에 저장합니다.
-    function isValidEmail(email) {
-        // 이메일 형식을 검증하는 정규 표현식
-        var regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        return regex.test(email);
-    }
-    function register() {
-        console.log($('#uploadForm'))
-        var formData = new FormData()
-        formData.append('file',$('#profile')[0].files[0])
-        let email = $('#email').val()
-        formData.append('email', email)
-        if (!isValidEmail(email)) {
-            alert("올바른 메일 형식을 입력해주세요.");
-            return;
-        }
-        formData.append('password', $('#password').val())
-        formData.append('nickname', $('#nickname').val())
-        console.log(formData)
-        $.ajax({
-            type: "POST",
-            url: "/api/register",
-            data: formData,
-            processData: false, // 중요: 이 설정을 통해 jQuery가 데이터를 쿼리 문자열로 변환하는 것을 방지합니다.
-            contentType: false,
-            success: function (response) {
-                if (response['result'] == 'success') {
-                    alert('회원가입이 완료되었습니다.')
-                    window.location.href = '/login'
-                } else {
-                    alert(response['msg'])
-                }
-            }
-        })
-    }
-    </script>
 <body>
     <div>
         <!-- Sign Up -->

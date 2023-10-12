@@ -308,6 +308,10 @@ def get_js_timestamp():
     js_timestamp = int(unix_timestamp * 1000)
     return js_timestamp
 
+@app.route('/dynamicjs/login')
+def login_js():
+    return render_template('js/login.js'), 200, {'Content-Type': 'text/javascript'}
+
 def getUserByEmail(email):
     user = {
         'nickname':'이름없음',

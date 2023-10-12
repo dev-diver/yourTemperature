@@ -1,0 +1,67 @@
+.container {
+    width: 400px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+}
+
+#climateImage {
+    width: 400px;
+}
+
+.upload {
+    border: 2px solid #000;
+    padding: 5px;
+    width: 150px;
+    text-align: center;
+}
+
+.popup {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 20%;
+    /* or whatever height you desire */
+    width: 100%;
+    /* or whatever width you desire */
+    margin: auto;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    display: none;
+}
+
+.votes {
+    display: flex;
+    flex-direction: row;
+}
+
+.vote {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Optional: To center align items vertically */
+}
+
+.row {
+    padding: 0px;
+    margin: 0px;
+}
+
+.profiles {
+    margin-top: 10px;
+}
+
+.profile-container {
+    padding: 0.5rem;
+}
+
+
+.hide {
+    display: none;
+}
