@@ -98,7 +98,9 @@
                 console.log(voteMsg, stateMsg[state])
                 html_template = `
                     <div class="profile-container column is-6">
-                        <img class="profile" src=${url}>
+                        <figure class="image is-48x48">
+                        <img class="profile is-rounded" src=${url}>
+                        </figure>
                         <span class="message hide">${message}</span>
                     </div>
                 `
@@ -348,7 +350,7 @@
             <div style="margin-bottom: 20px;">
                 <button class="button is-danger is-small" onClick="handleFileSelect('hot')">HOT</button>
                 <button class="button is-success is-small" onClick="handleFileSelect('good')">GOOD</button>
-                <button class="button is-link is-small" onClick="handleFileSelect('none')">COLD</button>
+                <button class="button is-link is-small" onClick="handleFileSelect('cold')">COLD</button>
             </div>
             
             <div class="columns">
@@ -389,7 +391,7 @@
         </div>
         <div id="msgInputPop" class="popup">
             <div>
-                <button onclick="hideMsgInput()">닫기</button>
+                <button onclick="hideMsgInput()" class="button is-danger"><ion-icon name="close-circle-outline"></ion-icon></button>
             </div>
             <form id="setForm">
                 <label for="temperature">메시지:</label>
