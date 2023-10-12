@@ -12,8 +12,8 @@ import json
 import sys
 
 app = Flask(__name__)
-#client = MongoClient('mongodb://test:test@localhost',27017)
-client = MongoClient('localhost', 27017)
+client = MongoClient('mongodb://test:test@3.35.3.55',27017)
+# client = MongoClient('localhost', 27017)
 ACCESS_KEY='AKIAUVLHFO3JAY6XVO2F'
 S3SECRET_KEY='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'
 SECRET_KEY = 'SPARTA'
@@ -89,7 +89,6 @@ def vote():
 def votes():
     print("요청")
     lastSet = db.set.find_one(sort=[('timestamp', DESCENDING)])
-    print("lastSet",lastSet)
     lastTime = lastSet['timestamp']
     recent_votes = list(db.vote.find({'timestamp': {'$gte': lastTime}}))
     hot = [doc for doc in recent_votes if doc['state'] == 'hot']
@@ -106,7 +105,6 @@ def votes():
     }
     result = {'result':'success'}
     result.update(response_data)
-    print(result)
     return jsonify(result)
 
 @app.route('/api/stateImages', methods=['GET'])
@@ -122,11 +120,15 @@ def upload_image():
     email=request.form['email']
     state=request.form['state']
     file = request.files['file']
+    category= request.form.get('category','state')
+    timestamp = get_js_timestamp()
     if file:
+        #TODO:S3 서버 장애시 대응
+        filename = category+'/'+state+str(timestamp)
         # S3에 파일 업로드
-        s3_client.upload_fileobj(file, 'krafton_yourname', file.filename+'1')
+        s3_client.upload_fileobj(file, 'krafton-yourname', filename)
         # S3 파일 URL 생성
-        file_url = f"https://krafton_yourname.s3.amazonaws.com/{file.filename+'1'}"
+        file_url = f"https://krafton-yourname.s3.amazonaws.com/{filename}"
 
         doc = {'email':email,'state':state,'image_url': file_url}
         db.image.insert_one(doc)
@@ -144,6 +146,15 @@ def set_temperature():
     db.set.insert_one(set)
     result = {'result':'success'}
     return jsonify(result)
+
+def get_js_timestamp():
+    # 현재 시간을 얻습니다.
+    now = datetime.utcnow()
+    # 유닉스 타임스탬프를 얻습니다 (초 단위).
+    unix_timestamp = now.timestamp()
+    # 초를 밀리초로 변환합니다.
+    js_timestamp = int(unix_timestamp * 1000)
+    return js_timestamp
 
 if __name__ == '__main__':
     app.run(debug=True)
