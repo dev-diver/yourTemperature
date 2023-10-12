@@ -223,7 +223,11 @@ def state_images():
         print("실패",e)
         result = {'result':'fail'}
         result.update(image)
-        return jsonify({'result':'fail','img_url':image['img_url']})
+        return jsonify({
+            'result':'fail',
+            'img_url':image['img_url'],
+            'nickname':image['nickname']
+        })
     result = {'result':'success'}
     result.update(image)
     return jsonify(result)
