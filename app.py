@@ -179,9 +179,9 @@ def votes():
         lastSet = db.set.find_one(sort=[('timestamp', DESCENDING)])
         lastTime = lastSet['timestamp']
         recent_votes = list(db.vote.find({'timestamp': {'$gte': lastTime}}))
-        hot = [doc if 'img_url' in doc else {**doc, 'img_url': base_profile_url} for doc in recent_votes if doc['state'] == 'hot']
-        good = [doc if 'img_url' in doc else {**doc, 'img_url': base_profile_url} for doc in recent_votes if doc['state'] == 'good']
-        cold = [doc if 'img_url' in doc else {**doc, 'img_url': base_profile_url} for doc in recent_votes if doc['state'] == 'cold']
+        hot = [doc if 'profile' in doc else {**doc, 'profile': base_profile_url} for doc in recent_votes if doc['state'] == 'hot']
+        good = [doc if 'profile' in doc else {**doc, 'profile': base_profile_url} for doc in recent_votes if doc['state'] == 'good']
+        cold = [doc if 'profile' in doc else {**doc, 'profile': base_profile_url} for doc in recent_votes if doc['state'] == 'cold']
         states = {'hot':len(hot),'good':len(good),'cold':len(cold)}
         max_state = max(states, key=lambda k: states[k])
         print('hot',len(hot),"cold",len(cold),'good',len(good),max_state)
