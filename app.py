@@ -18,6 +18,9 @@ ACCESS_KEY='AKIAUVLHFO3JAY6XVO2F'
 S3SECRET_KEY='xGd36QoMpQqi+6WNxtQ48PM1uv6q8OhAkLcIuUNm'
 SECRET_KEY = 'SPARTA'
 
+bucket_name = 'krafton-yourname'
+bucket_url= f'https://{bucket_name}.s3.amazonaws.com'
+base_profile_url = f'{bucket_url}/baseprofile.png'
 
 s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=S3SECRET_KEY)
 
@@ -78,16 +81,26 @@ def api_login():
 def vote():
     state = request.form.get('state')
     email = request.form.get('email')
+
+    user = db.login.find_one({'email',email})
+    nickname = user['nickname'] or '이름없음'
+    profile = user['profile'] or base_profile_url
     message = request.form.get('message','')
     timestamp = datetime.utcnow()
     
-    vote = {'state':state,'email':email,'message':message,'timestamp':timestamp}
+    vote = {
+        'state':state,
+        'email':email,
+        'nickname':nickname,
+        'profile_url':profile,
+        'message':message,
+        'timestamp':timestamp,
+    }
     db.vote.insert_one(vote)
     return jsonify({'result':'success'})
 
 @app.route('/api/votes', methods=['GET'])
 def votes():
-    print("요청")
     lastSet = db.set.find_one(sort=[('timestamp', DESCENDING)])
     lastTime = lastSet['timestamp']
     recent_votes = list(db.vote.find({'timestamp': {'$gte': lastTime}}))
@@ -104,7 +117,6 @@ def votes():
         'most': max_state
     }
     result = {'result':'success'}
-    result.update(response_data)
     return jsonify(result)
 
 @app.route('/api/stateImages', methods=['GET'])
@@ -121,16 +133,21 @@ def upload_image():
     state=request.form['state']
     file = request.files['file']
     category= request.form.get('category','state')
+    print(category)
     timestamp = get_js_timestamp()
     if file:
         #TODO:S3 서버 장애시 대응
         filename = category+'/'+state+str(timestamp)
+        print(filename)
         # S3에 파일 업로드
         s3_client.upload_fileobj(file, 'krafton-yourname', filename)
         # S3 파일 URL 생성
-        file_url = f"https://krafton-yourname.s3.amazonaws.com/{filename}"
+        file_url = f"{bucket_url}/{filename}"
 
-        doc = {'email':email,'state':state,'image_url': file_url}
+        doc = {
+            'email':email,
+            'state':state,
+            'img_url': file_url}
         db.image.insert_one(doc)
         
         return jsonify({'result': 'success'}), 200
@@ -141,18 +158,25 @@ def upload_image():
 def set_temperature():
     email=request.form['email']
     temperature = request.form['temperature']
+
+    user = db.login.find_one({'email',email})
+    nickname = user['nickname'] or '이름없음'
+    profile = user['profile'] or base_profile
     timestamp = datetime.utcnow()
-    set = {'email':email,'temperature':temperature,'timestamp':timestamp}
+    set = {
+        'email':email,
+        'temperature':temperature,
+        'nickname':nickname,
+        'profile':profile,
+        'timestamp':timestamp}
     db.set.insert_one(set)
     result = {'result':'success'}
     return jsonify(result)
 
 def get_js_timestamp():
-    # 현재 시간을 얻습니다.
+
     now = datetime.utcnow()
-    # 유닉스 타임스탬프를 얻습니다 (초 단위).
     unix_timestamp = now.timestamp()
-    # 초를 밀리초로 변환합니다.
     js_timestamp = int(unix_timestamp * 1000)
     return js_timestamp
 
