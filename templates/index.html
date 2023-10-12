@@ -12,26 +12,27 @@
 
 
     <script>
+        let token;
         let user;
         let votes;  //처음에 가져오는 투표결과들
         let uploadImageState = 'none' //아무것도 없을 때 이미지 상태
         let voteState = 'none'
-        stateMsg ={
-            'hot' : '추워요',
-            'good' : '적당해요',
-            'cold' : '더워요'
+        stateMsg = {
+            'hot': '더워요',
+            'good': '적당해요',
+            'cold': '추워요'
         }
-        stateCuteMsg ={
-            'hot' : '추웡',
-            'good' : '좋앙',
-            'cold' : '더웡'
+        stateCuteMsg = {
+            'hot': '더웡',
+            'good': '좋앙',
+            'cold': '추웡'
         }
 
         $(document).ready(function () {
-            let token = $.cookie('token')
-            let user = JSON.parse($.cookie('user'))
+            token = $.cookie('token')
+            user = JSON.parse($.cookie('user'))
             console.log(user)
-            console.log(user['email'],user['nickname'])
+            console.log(user['email'], user['nickname'])
             showState();
 
             $('#setForm').on('submit', function (e) {
@@ -40,25 +41,25 @@
                 changeTemperature(temperature);
             });
 
-            $('#msgInputPop').on('submit', function(e) {
+            $('#msgInputPop').on('submit', function (e) {
                 e.preventDefault();  // Prevents the form from submitting the traditional way
                 let message = $('#message').val();
                 updateState(voteState, message)
             });
 
-            $(document).on('mouseenter', '.profile-container', function(){
-                $(this).find('.message').css('display','block')
-            }).on('mouseleave', '.profile-container', function(){
-                $(this).find('.message').css('display','none')
+            $(document).on('mouseenter', '.profile-container', function () {
+                $(this).find('.message').css('display', 'block')
+            }).on('mouseleave', '.profile-container', function () {
+                $(this).find('.message').css('display', 'none')
             });
         });
 
-        function logout(){
+        function logout() {
             $.removeCookie('user');
             $.removeCookie('token');
-            window.location.href="/login"
+            window.location.href = "/login"
         }
-        
+
         function showState() {
             $.ajax({
                 type: "GET",
@@ -75,13 +76,13 @@
             })
         }
 
-        function showStateMessage(){
+        function showStateMessage() {
             let most = votes['most']
             let messages = votes[most]
             var randomIndex = Math.floor(Math.random() * messages.length);
             let message = messages[randomIndex]['message']
-            message = message !=''? message : stateMsg[most]
-            $('#climateMessage').text(message)
+            message = message != '' ? message : stateMsg[most]
+            $('#climateMessage').text(`[${message}]`)
         }
 
         function show_profile(state) {
@@ -89,20 +90,19 @@
             for (let i = 0; i < votes[state].length; i++) {
                 url = votes[state][i]['img_url']
                 voteMsg = votes[state][i]['message']
-                message = voteMsg=="" ? stateCuteMsg[state]:voteMsg
-                console.log(voteMsg,stateMsg[state])
+                message = voteMsg == "" ? stateCuteMsg[state] : voteMsg
+                console.log(voteMsg, stateMsg[state])
                 html_template = `
                     <div class="profile-container column is-6">
                         <img class="profile" src=${url}>
                         <span class="message hide">${message}</span>
                     </div>
                 `
-                $(`#${state} > .profiles`).append(html_template);
-                row = parseInt(i/2)
-                mod = i%2
+                row = parseInt(i / 2)
+                mod = i % 2
                 console.log(row, mod)
-                if(mod==0){
-                    $(`#${state} > .profiles`).append(`<div id=${state}${row} class="columns"></div>`)
+                if (mod == 0) {
+                    $(`#${state} > .profiles`).append(`<div id=${state}${row} class="columns row"></div>`)
                 }
                 $(`#${state}${row}`).append(html_template);
             }
@@ -159,19 +159,19 @@
             hidePop()
         }
 
-        function changeTemperature(temperature){
+        function changeTemperature(temperature) {
             $.ajax({
                 type: 'POST',
                 url: '/api/set',
                 data: {
-                    "email" : user['email'],
+                    "email": user['email'],
                     "temperature": temperature
                 },
                 contentType: 'application/json',
                 success: function (response) {
                     if (response['result'] == 'success') {
                         alert('설정 완료')
-                        window.location.reload()                       
+                        window.location.reload()
                     }
                 }
             });
@@ -203,13 +203,13 @@
             $('#setPop').css('display', 'none')
         }
 
-        function showMsgInput(state){
+        function showMsgInput(state) {
             let voteState = state
-            $('#msgInputPop').css('display','block')
+            $('#msgInputPop').css('display', 'block')
         }
 
-        function hideMsgInput(){
-            $('#msgInputPop').css('display','none')
+        function hideMsgInput() {
+            $('#msgInputPop').css('display', 'none')
         }
 
     </script>
@@ -241,7 +241,7 @@
             bottom: 0;
             height: 20%;
             /* or whatever height you desire */
-            width: 50%;
+            width: 100%;
             /* or whatever width you desire */
             margin: auto;
             background: rgba(0, 0, 0, 0.5);
@@ -265,18 +265,35 @@
             /* Optional: To center align items vertically */
         }
 
-        .profile {
-            width: 30px;
+        .row {
+            padding: 0px;
+            margin: 0px;
         }
 
+        .profiles {
+            margin-top: 10px;
+        }
+
+        .profile-container {
+            padding: 0.5rem;
+        }
+
+
+        .hide {
+            display: none;
+        }
+
+        /* .bulma-delete-mixin {
+            @include delete;
+        } */
     </style>
 </head>
 
 <body>
     <div class="container">
         <h2 class="title is-2" style="margin-top: 30px;">현재 정글의 기상상태</h2>
-        <h3 id="climateMessage"></h3>
-        <div onclick="logout()">로그아웃</div>
+        <h3 class="title is-3" id="climateMessage"></h3>
+        <div class="has-text-right"><button class="button" onclick="logout()">로그아웃</button></div>
         <div>
             <img id="climateImage" src="" alt="">
         </div>
@@ -302,7 +319,7 @@
                 </div>
             </div>
             <div id="good" class="column">
-                <button class="button is-success is-medium" onclick="showMsgInput('good')" >Good</button>
+                <button class="button is-success is-medium" onclick="showMsgInput('good')">Good</button>
                 <div class="profiles">
                 </div>
             </div>
@@ -314,29 +331,48 @@
         </div>
         <div id="climatePop" class="popup">
             <div style="margin-bottom: 5px; text-align: right ;">
-                <button onclick="hidePop()" class="button"><ion-icon name="close-outline" size = "large" style="color: red;"></ion-icon></button>
+                <button onclick="hidePop()" class="bulma-delete-mixin is-small"></button>
             </div>
             <div style="margin-bottom: 20px;">
                 <button class="button is-danger is-small" onClick="handleFileSelect('hot')">HOT</button>
                 <button class="button is-success is-small" onClick="handleFileSelect('good')">GOOD</button>
                 <button class="button is-link is-small" onClick="handleFileSelect('none')">COLD</button>
             </div>
-            <form id="uploadForm" enctype="multipart/form-data">
-                <input type="file" id="imageFile" name="file">
+            
+            <div class="columns">
+            <form id="uploadForm" class="column is-10 file has-name is-fullwidth is-small" enctype="multipart/form-data">
+                <label class="file-label ">
+                    <input id ="imageFile" class="file-input" type="file" name="file">
+                    <span class="file-cta">
+                      <span class="file-icon">
+                        <i class="fas fa-upload"></i>
+                      </span>
+                      <span class="file-label">
+                        Choose a file…
+                      </span>
+                    </span>
+                    <span class="file-name">
+                      
+                    </span>
+                  </label>
+                
+                </form>
                 <input type="button" value="Upload" onclick="uploadFile()">
-            </form>
+            </div>
+            
         </div>
         <div id="setPop" class="popup">
             <div style="text-align: right;">
-                <button onclick="hideSet()" class="button"><ion-icon name="close-outline" size = "large" style="color: red;""></ion-icon></button>
+                <button onclick="hideSet()" class="button"><ion-icon name="close-outline" size="large"
+                        style="color: red;""></ion-icon></button>
             </div>
-            <div style="text-align: center;">
-                <form id="setForm">
-                    <label for="temperature"><strong style="color: white;">설정 온도:</strong></label>
-                    <input class="input is-small" type="number" id="temperature" name="temperature" required
-                        style="width: 60px;">
-                    <input type="submit" value="바꿈!">
-                </form>
+            <div style=" text-align: center;">
+                        <form id="setForm">
+                            <label for="temperature"><strong style="color: white;">설정 온도:</strong></label>
+                            <input class="input is-small" type="number" id="temperature" name="temperature" required
+                                style="width: 60px;">
+                            <input type="submit" value="바꿈!">
+                        </form>
             </div>
         </div>
         <div id="msgInputPop" class="popup">
