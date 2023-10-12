@@ -59,14 +59,20 @@ def main():
         payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
         user_info = db.user.find_one({"email": payload["email"]})
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> main
         if user_info is not None:
             nickname = user_info.get("nickname", "Guest")
         else:
             nickname = "Guest"
 
         return render_template('index.html', nickname=nickname)
+<<<<<<< HEAD
 =======
         return render_template('index.html', nickname=user_info["nickname"])
+>>>>>>> main
+=======
 >>>>>>> main
     except jwt.ExpiredSignatureError:
         return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
@@ -102,6 +108,7 @@ def api_login():
     password_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     userDoc = db.user.find_one({'email': email_receive})
     isLogin = password_hash == userDoc['password']
     if userDoc is not None and isLogin:
@@ -111,6 +118,11 @@ def api_login():
         print(result)
     if result is not None:
 >>>>>>> main
+=======
+    userDoc = db.user.find_one({'email': email_receive})
+    isLogin = password_hash == userDoc['password']
+    if userDoc is not None and isLogin:
+>>>>>>> main
         # JWT 토큰에는, payload와 시크릿키가 필요합니다.
         # 시크릿키가 있어야 토큰을 디코딩(=풀기) 해서 payload 값을 볼 수 있습니다.
         # 아래에선 email와 exp를 담았습니다. 즉, JWT 토큰을 풀면 유저email 값을 알 수 있습니다.
@@ -118,12 +130,17 @@ def api_login():
         payload = {
             'email': email_receive,
 <<<<<<< HEAD
+<<<<<<< HEAD
             'nickname':userDoc['nickname'],
             'profile':userDoc['profile'],
 =======
 >>>>>>> main
+=======
+            'nickname':userDoc['nickname'],
+            'profile':userDoc['profile'],
+>>>>>>> main
             'exp': datetime.utcnow() + timedelta(days=1)
-        }
+                    }
         token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
         user = {
             'email':email_receive,
@@ -171,9 +188,9 @@ def votes():
         lastSet = db.set.find_one(sort=[('timestamp', DESCENDING)])
         lastTime = lastSet['timestamp']
         recent_votes = list(db.vote.find({'timestamp': {'$gte': lastTime}}))
-        hot = [doc for doc in recent_votes if doc['state'] == 'hot']
-        good = [doc for doc in recent_votes if doc['state'] == 'good']
-        cold = [doc for doc in recent_votes if doc['state'] == 'cold']
+        hot = [doc if 'img_url' in doc else {**doc, 'img_url': base_profile_url} for doc in recent_votes if doc['state'] == 'hot']
+        good = [doc if 'img_url' in doc else {**doc, 'img_url': base_profile_url} for doc in recent_votes if doc['state'] == 'good']
+        cold = [doc if 'img_url' in doc else {**doc, 'img_url': base_profile_url} for doc in recent_votes if doc['state'] == 'cold']
         states = {'hot':len(hot),'good':len(good),'cold':len(cold)}
         max_state = max(states, key=lambda k: states[k])
     except:
