@@ -12,6 +12,7 @@
         let user;
         let votes;  //처음에 가져오는 투표결과들
         let uploadImageState = 'none' //아무것도 없을 때 이미지 상태
+        let voteState = 'none'
 
         $(document).ready(function () {
             let user = $.cookie('user')
@@ -22,7 +23,21 @@
                 let temperature = $('#temperature').val();
                 changeTemperature(temperature);
             });
+
+            $('#msgInputPop').on('submit', function(e) {
+                e.preventDefault();  // Prevents the form from submitting the traditional way
+                let message = $('#message').val();
+                updateState(voteState, message)
+            });
+
+            $(document).on('mouseenter', '.profile-container', function(){
+                alert('Mouse Over');
+            }).on('mouseleave', '.profile-container', function(){
+                alert('Mouse Out');
+            });
         });
+
+        
 
         function showState() {
             $.ajax({
@@ -40,8 +55,15 @@
         }
         function show_profile(state) {
             for (let i = 0; i < votes[state].length; i++) {
-                url=votes[state][i]['img_url']
-                $(`#${state} > .profiles`).append(`<img class="profile" src=${url}>`);
+                url = votes[state][i]['img_url']
+                message = votes[state][i]['message']
+                html_template = `
+                    <div class="profile-container">
+                        <img class="profile" src=${url}>
+                        <span class="hide">${message}</span>
+                    </div>
+                `
+                $(`#${state} > .profiles`).append(html_template);
             }
 
         }
@@ -72,6 +94,7 @@
                 }
             });
         }
+
         function uploadFile() {
             var formData = new FormData($('#uploadForm')[0]);
             formData.append('email',user['email'])
@@ -93,6 +116,24 @@
                 }
             });
             hidePop()
+        }
+
+        function changeTemperature(temperature){
+            $.ajax({
+                type: 'POST',
+                url: '/api/set',
+                data: {
+                    "email" : user['email'],
+                    "temperature": temperature
+                },
+                contentType: 'application/json',
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert('설정 완료')
+                        window.location.reload()                       
+                    }
+                }
+            });
         }
 
         function handleFileSelect(state) {
@@ -121,23 +162,15 @@
             $('#setPop').css('display','none')
         }
 
-        function changeTemperature(temperature){
-            $.ajax({
-                type: 'POST',
-                url: '/api/set',
-                data: {
-                    "email" : user['email'],
-                    "temperature": temperature
-                },
-                contentType: 'application/json',
-                success: function (response) {
-                    if (response['result'] == 'success') {
-                        alert('설정 완료')
-                        window.location.reload()                       
-                    }
-                }
-            });
+        function showMsgInput(state){
+            let voteState = state
+            $('#msgInputPop').css('display','block')
         }
+
+        function hideMsgInput(){
+            $('#msgInputPop').css('display','none')
+        }
+
     </script>
 
     <style>
@@ -191,6 +224,11 @@
         .profile {
             width:30px;
         }
+
+        .hide {
+            display: none;
+        }
+
     </style>
 </head>
 
@@ -205,17 +243,17 @@
         <br>
         <div class="votes">
             <div id="hot" class="vote">
-                <button id="hotButton" onclick="updateState('hot')">Hot</button>
+                <button id="hotButton" onclick="showMsgInput('hot')">Hot</button>
                 <div class ="profiles">
                 </div>
             </div>
             <div id="good" class="vote">
-                <button id="goodButton" onclick="updateState('good')">Good</button>
+                <button id="goodButton" onclick="showMsgInput('good')">Good</button>
                 <div class ="profiles">
                 </div>
             </div>
             <div id="cold" class="vote">
-                <button id="coldButton" onclick="updateState('cold')">Cold</button>
+                <button id="coldButton" onclick="showMsgInput('cold')">Cold</button>
                 <div class ="profiles">
                 </div>
             </div>
@@ -242,9 +280,18 @@
                 <input type="submit" value="바꿈!">
             </form>
         </div>
+        <div id="msgInputPop" class="popup">
+            <div>
+                <button onclick="hideMsgInput()">닫기</button>
+            </div>
+            <form id="setForm">
+                <label for="temperature">메시지:</label>
+                <input type="text" id="message" name="message" placeholder="">
+                <input type="submit" value="투표">
+            </form>
+        </div>
     </div>
-    
-    
+
 </body>
 
 </html>
