@@ -42,8 +42,9 @@
                 url : "/api/stateImages",
                 data : {'state' : state },
                 success : function(response){
-                    img_url = response
+                    img_url = response['image_url']
                     console.log(img_url)
+                    // $('#cliamateImage').attr('src',img_url)
                     //이미지 들어갈 태그를 아이디로 찾아서
                     //imgsrc = imgurl
                     // 여기에 state에 대응되는 사진이 나오도록 구현해야 됨
