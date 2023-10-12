@@ -101,7 +101,7 @@ def api_login():
         # exp에는 만료시간을 넣어줍니다(5초). 만료시간이 지나면, 시크릿키로 토큰을 풀 때 만료되었다고 에러가 납니다.
         payload = {
             'id': id_receive,
-            'exp': datetime.utcnow() + timedelta(seconds=5)
+            'exp': datetime.utcnow() + timedelta(days=1)
         }
         token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
 
@@ -146,9 +146,9 @@ def votes():
         lastSet = db.set.find_one(sort=[('timestamp', DESCENDING)])
         lastTime = lastSet['timestamp']
         recent_votes = list(db.vote.find({'timestamp': {'$gte': lastTime}}))
-        hot = [doc for doc in recent_votes if doc['state'] == 'hot']
-        good = [doc for doc in recent_votes if doc['state'] == 'good']
-        cold = [doc for doc in recent_votes if doc['state'] == 'cold']
+        hot = [doc if 'img_url' in doc else {**doc, 'img_url': base_profile_url} for doc in recent_votes if doc['state'] == 'hot']
+        good = [doc if 'img_url' in doc else {**doc, 'img_url': base_profile_url} for doc in recent_votes if doc['state'] == 'good']
+        cold = [doc if 'img_url' in doc else {**doc, 'img_url': base_profile_url} for doc in recent_votes if doc['state'] == 'cold']
         states = {'hot':len(hot),'good':len(good),'cold':len(cold)}
         max_state = max(states, key=lambda k: states[k])
     except:
