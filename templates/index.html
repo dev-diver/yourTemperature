@@ -7,6 +7,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <title>너의 온도는</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
 
     <script>
         let user;
@@ -47,13 +49,13 @@
         }
         function show_climate(state) {
             $.ajax({
-                type : "GET",
-                url : "/api/stateImages",
-                data : {'state' : state },
-                success : function(response){
+                type: "GET",
+                url: "/api/stateImages",
+                data: { 'state': state },
+                success: function (response) {
                     img_url = response['image_url']
                     const imageElement = document.getElementById('climateImage');
-                    imageElement.src = img_url;                
+                    imageElement.src = img_url;
                 }
             })
         }
@@ -67,7 +69,7 @@
                 success: function (response) {
                     if (response['result'] == 'success') {
                         alert('투표 완료')
-                        window.location.reload()                       
+                        window.location.reload()
                     }
                 }
             });
