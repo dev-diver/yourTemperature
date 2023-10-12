@@ -4,7 +4,7 @@ import boto3
 
 from jwt.exceptions import ExpiredSignatureError
 import hashlib
-from flask import Flask, render_template, jsonify, request,url_for, redirect, make_response
+from flask import Flask, render_template, jsonify, request ,url_for, redirect, make_response
 from flask.json.provider import JSONProvider
 
 from datetime import datetime, timedelta
@@ -78,14 +78,25 @@ def register():
 
 @app.route('/api/register', methods=['POST'])
 def api_register():
-    email_receive = request.form['email_give']
-    password_receive = request.form['password_give']
-    nickname_receive = request.form['nickname_give']
-    profile_receive = request.form['profile_give']
+    email = request.form['email']
+    password = request.form['password']
+    nickname = request.form['nickname']
+    print(request.files)
+    file = request.files['file']
 
-    password_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()
+    password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
-    db.user.insert_one({'email': email_receive, 'password': password_hash, 'nickname': nickname_receive, 'profile': profile_receive})
+    if file:
+        #TODO:S3 서버 장애시 대응
+        filename = f'profile{email}'
+        file_url = getFileUrl(file,filename)
+
+    db.user.insert_one({
+        'email': email, 
+        'password': password_hash, 
+        'nickname': nickname, 
+        'profile': file_url
+    })
 
     return jsonify({'result': 'success'})
 
@@ -128,12 +139,14 @@ def api_login():
 @app.route('/api/vote', methods=['POST'])
 def vote():
     try:
-        state = request.form.get('state')
-        email = request.form.get('email')
+        req= request.get_json()
+        state = req['state']
+        email = req['email']
+        message = req['message']
         user = getUserByEmail(email)
-        message = request.form.get('message','')
+        print(user)
         timestamp = datetime.utcnow()
-        
+        print("Vote", state)
         vote = {
             'state':state,
             'email':email,
@@ -142,10 +155,17 @@ def vote():
             'message':message,
             'timestamp':timestamp,
         }
-        db.vote.insert_one(vote)
-    except:
+        result = db.vote.update_one({'email':email},{'$set': vote})
+        if result.modified_count == 1:   #메모가 하나만 수정됐는지 확인
+            return jsonify({'result': 'success'})
+        elif result.modified_count == 0: #메모가 같은 값이면 0. 수정되지 않았는지 확인
+            db.vote.insert_one(vote)
+            return jsonify({'result' : 'no_change'})
+        else:                               #메모 수정이 1개 이상이면 서버 오류
+            return jsonify({'result': 'fail'})
+    except Exception as e:
+        print("실패", e)
         return jsonify({'result':'fail'})
-    return jsonify({'result':'success'})
 
 @app.route('/api/votes', methods=['GET'])
 def votes():
@@ -164,7 +184,16 @@ def votes():
         cold = [doc if 'img_url' in doc else {**doc, 'img_url': base_profile_url} for doc in recent_votes if doc['state'] == 'cold']
         states = {'hot':len(hot),'good':len(good),'cold':len(cold)}
         max_state = max(states, key=lambda k: states[k])
-    except:
+        print('hot',len(hot),"cold",len(cold),'good',len(good),max_state)
+        if(len(hot)==len(cold)): 
+            max_state = 'good'
+            print(max_state)
+        if(len(hot)==len(good) and len(cold)==len(good)): 
+            max_state = 'good'
+            if(len(hot)==0):
+                max_state='none'
+    except Exception as e:
+        print("실패",e)
         return jsonify({'result':'fail'}), 400
     data = {
         'hot': hot,
@@ -181,18 +210,34 @@ def state_images():
     image = {'img_url':base_state_url}
     try:
         state = request.args.get('state','none')
+        print("state",state)
         pipeline = [
             {"$match": {"state": state}},
             {"$sample": {"size": 1}}
         ]
-        image = list(db.set.aggregate(pipeline))[0]
-        print(image['img_url'])
-    except:
-        jsonify({'result':'fail','image_url':image['img_url']})
+        image = list(db.image.aggregate(pipeline))
+        print(image)
+        image = image[0]
+        print("image URL",image['img_url'])
+    except Exception as e:
+        print("실패",e)
+        result = {'result':'fail'}
+        result.update(image)
+        return jsonify({'result':'fail','img_url':image['img_url']})
     result = {'result':'success'}
-    image_url = {'image_url':image['img_url']}
-    result.update(image_url)
+    result.update(image)
     return jsonify(result)
+
+def getFileUrl(file,filename):
+    try:
+        # S3에 파일 업로드
+        s3_client.upload_fileobj(file, 'krafton-yourname', filename)
+    except Exception as e:
+        print('이미지 서버 이상',e)
+        return jsonify({'result':'fail','message':'이미지 서버가 좋지 않습니다.'}), 400
+    # S3 파일 URL 생성
+    file_url = f"{bucket_url}/{filename}"
+    return file_url
 
 @app.route('/api/uploadImage', methods=['POST'])
 def upload_image():
@@ -207,15 +252,7 @@ def upload_image():
     if file:
         #TODO:S3 서버 장애시 대응
         filename = category+'/'+state+str(timestamp)
-        print(filename)
-        # S3에 파일 업로드
-        try:
-            s3_client.upload_fileobj(file, 'krafton-yourname', filename)
-        except:
-            print('이미지 서버 이상')
-            return jsonify({'result':'fail','message':'이미지 서버가 좋지 않습니다.'}), 400
-        # S3 파일 URL 생성
-        file_url = f"{bucket_url}/{filename}"
+        file_url = getFileUrl(file,filename)
 
         doc = {
             'email':email,
@@ -230,8 +267,9 @@ def upload_image():
 
 @app.route('/api/set', methods=['POST'])
 def set_temperature():
-    email=request.form.get('email')
-    temperature = request.form.get('temperature')
+    req= request.get_json()
+    email=req['email']
+    temperature = req['temperature']
     timestamp = datetime.utcnow()
     user = {
         'email':email,
@@ -240,15 +278,19 @@ def set_temperature():
         'profile':base_profile_url,
         'timestamp':timestamp
     }
+    print(email)
     try:
-        userDoc = db.login.find_one({'email',email})
+        userDoc = getUserByEmail(email)
+        print(userDoc)
         user.update({
-            'nickname':user['nickname'],
-            'profile':user['profile'],
+            'nickname':userDoc['nickname'],
+            'profile':userDoc['profile'],
         })
-    except:
+    except Exception as e:
+        print("실패", e)
         return jsonify({'result':'fail'})
     db.set.insert_one(user)
+    print("세트 완료")
     result = {'result':'success'}
     return jsonify(result)
 
@@ -265,15 +307,15 @@ def getUserByEmail(email):
         'profile': base_profile_url
     }
     try:
-        userDoc = db.login.find_one({'email',email})
+        userDoc = db.user.find_one({'email':email})
         nickname = userDoc['nickname']
         profile = userDoc['profile']
         user = {
             'nickname':nickname,
             'profile':profile
         }
-    except:
-        print("해당 email 없음")
+    except Exception as e:
+        print("해당 email 없음",e)
     return user
 
 if __name__ == '__main__':
