@@ -59,13 +59,13 @@
         function updateState(newState) {
             $.ajax({
                 type: 'POST',
-                url: '/api/update-state',
-                data: JSON.stringify({ state: newState }),
+                url: '/api/vote',
+                data: JSON.stringify({ "state": newState , "email" : "wjdtka1325@naver.com" }),
                 contentType: 'application/json',
                 success: function (response) {
                     if (response['result'] == 'success') {
                         alert('투표 완료')
-                        window.location.reload()
+                        window.location.reload()                       
                     }
                 }
             });
@@ -144,9 +144,9 @@
         </div>
         <button onclick="showElement()">이미지 업로드</button>
         <br>
-        <button id="hotButton" onclick="updateState(Hot)">Hot</button> <button id="goodButton"
-            onclick="updateState(Good)">Good</button>
-        <button id="coldButton" onclick="updateState(Cold)">Cold</button>
+        <button id="hotButton" onclick="updateState('hot')">Hot</button> <button id="goodButton"
+            onclick="updateState('good')">Good</button>
+        <button id="coldButton" onclick="updateState('cold')">Cold</button>
     </div>
     <div id="pop" class="popup">
         <button onClick="handleFileSelect('hot')">HOT</button>
