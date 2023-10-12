@@ -15,7 +15,9 @@
         let voteState = 'none'
 
         $(document).ready(function () {
+            let token = $.cookie('token')
             let user = $.cookie('user')
+            console.log(token, user)
             showState();
 
             $('#setForm').on('submit', function(e) {
