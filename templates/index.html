@@ -42,8 +42,13 @@
                 url : "/api/stateImages",
                 data : {'state' : state },
                 success : function(response){
-                    img_url = response['image_url']
-                    $('#climateImage').attr('src',img_url)
+                    img_url = response
+                    console.log(img_url)
+                    //이미지 들어갈 태그를 아이디로 찾아서
+                    //imgsrc = imgurl
+                    // 여기에 state에 대응되는 사진이 나오도록 구현해야 됨
+                    const imageElement = document.getElementById('climateImage');
+                    imageElement.src = img_url;                
                 }
             })
         }
@@ -75,11 +80,14 @@
                 contentType: false, // 중요: FormData를 사용할 때는 'multipart/form-data'로 설정하되, 자동 생성되도록 둡니다.
                 success: function (response) {
                     console.log('File uploaded successfully:', response);
+                    alert("업로드 성공 !!")
                 },
                 error: function (jqXHR, textStatus, errorMessage) {
                     console.log('Error uploading file:', errorMessage);
+                    alert("업로드 실패 !!")
                 }
             });
+            hidePop()
         }
 
         function handleFileSelect(state) {
@@ -91,8 +99,8 @@
             pop.style.display = 'block'; // 요소를 보이게 만듭니다.
         }
         function hidePop() {
-            var myDiv = document.getElementById('pop');
-            myDiv.style.display = 'block'; // 요소를 보이게 만듭니다.
+            var pop = document.getElementById('pop');
+            pop.style.display = 'none'; // 요소를 숨깁니다
         }
     </script>
 
@@ -127,7 +135,8 @@
     <h2>현재 정글의 기상상태</h2>
     <div id="container">
         <div>
-            <img id="climateImage" src=""alt="">
+            <img id="climateImage" src=""
+                alt="">
         </div>
         <button onclick="showPop()">이미지 업로드</button>
         <br>
