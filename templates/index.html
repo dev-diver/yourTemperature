@@ -5,17 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <title>.</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <title>너의 온도는</title>
 
     <script>
-        $(document).ready(function () {
-            // index.html 로딩이 완료되면 자동으로 showState() 함수를 호출
-            showState();
-        });
+        let user;
+        let votes;  //처음에 가져오는 투표결과들
+        let uploadImageState = 'none' //아무것도 없을 때 이미지 상태
 
-        // votes : state 구조인가 ?
-        let votes; 
-        let uploadImageState = 'none'
+        $(document).ready(function () {
+            let user = $.cookie('user')
+            showState();
+
+            $('#setForm').on('submit', function(e) {
+                e.preventDefault();  // Prevents the form from submitting the traditional way
+                let temperature = $('#temperature').val();
+                changeTemperature(temperature);
+            });
+        });
 
         function showState() {
             $.ajax({
@@ -24,7 +31,6 @@
                 data: {},
                 success: function (response) {
                     votes = response
-                    console.log(votes)
                     show_profile('hot')
                     show_profile('good')
                     show_profile('cold')
@@ -34,7 +40,8 @@
         }
         function show_profile(state) {
             for (let i = 0; i < votes[state].length; i++) {
-                console.log(votes[state][i])
+                url=votes[state][i]['img_url']
+                $(`#${state} > .profiles`).append(`<img class="profile" src=${url}>`);
             }
 
         }
@@ -42,36 +49,32 @@
             $.ajax({
                 type : "GET",
                 url : "/api/stateImages",
-                data : {'state' :state},
+                data : {'state' : state },
                 success : function(response){
-                    img_url = response
-                    console.log(img_url)
-                    //이미지 들어갈 태그를 아이디로 찾아서
-                    //imgsrc = imgurl
-                    // 여기에 state에 대응되는 사진이 나오도록 구현해야 됨
-                    // 서버에서 state에 대응되는 url을 가져와야 되는데 state : url 구조의 딕셔너리인지 어떻게 해야될지 모르겠음...
+                    img_url = response['image_url']
+                    const imageElement = document.getElementById('climateImage');
+                    imageElement.src = img_url;                
                 }
             })
         }
         // 상태 업데이트 함수
-        
         function updateState(newState) {
             $.ajax({
                 type: 'POST',
-                url: '/api/update-state',
-                data: JSON.stringify({ state: newState }),
+                url: '/api/vote',
+                data: JSON.stringify({ "state": newState , "email" : user['email'] }),
                 contentType: 'application/json',
                 success: function (response) {
                     if (response['result'] == 'success') {
                         alert('투표 완료')
-                        window.location.reload()
+                        window.location.reload()                       
                     }
                 }
             });
         }
         function uploadFile() {
             var formData = new FormData($('#uploadForm')[0]);
-            formData.append('email','valen@gmail.com')
+            formData.append('email',user['email'])
             formData.append('state',uploadImageState)
             console.log("전송", formData)
             $.ajax({
@@ -82,80 +85,166 @@
                 contentType: false, // 중요: FormData를 사용할 때는 'multipart/form-data'로 설정하되, 자동 생성되도록 둡니다.
                 success: function (response) {
                     console.log('File uploaded successfully:', response);
+                    alert("업로드 성공 !!")
                 },
                 error: function (jqXHR, textStatus, errorMessage) {
                     console.log('Error uploading file:', errorMessage);
+                    alert("업로드 실패 !!")
                 }
             });
+            hidePop()
         }
 
         function handleFileSelect(state) {
             uploadImageState = state
             console.log(uploadImageState)
+            $('#uploadForm').css('display', 'block');
         }
-        function showElement() {
-            var pop = document.getElementById('pop');
-            pop.style.display = 'block'; // 요소를 보이게 만듭니다.
 
+        function showPop() {
+            var pop = document.getElementById('climatePop');
+            pop.style.display = 'block'; // 요소를 보이게 만듭니다.
+            uploadImageState = 'none'
+            $('#uploadForm').css('display', 'none');
         }
+
         function hidePop() {
-            var myDiv = document.getElementById('pop');
-            myDiv.style.display = 'block'; // 요소를 보이게 만듭니다.
+            var pop = document.getElementById('climatePop');
+            pop.style.display = 'none'; // 요소를 숨깁니다
+        }
+
+        function showSet() {
+            $('#setPop').css('display','block')
+        }
+
+        function hideSet() {
+            $('#setPop').css('display','none')
+        }
+
+        function changeTemperature(temperature){
+            $.ajax({
+                type: 'POST',
+                url: '/api/set',
+                data: {
+                    "email" : user['email'],
+                    "temperature": temperature
+                },
+                contentType: 'application/json',
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        alert('설정 완료')
+                        window.location.reload()                       
+                    }
+                }
+            });
         }
     </script>
 
     <style>
+        #container {
+            width: 400px;
+            margin: 0 auto;
+            text-align: center;
+            position:relative;
+        }
+
+        #climateImage {
+            width: 400px;
+        }
+
         .upload {
             border: 2px solid #000;
-            /* 테두리 스타일을 지정합니다. */
             padding: 5px;
-            /* 테두리와 내용 사이의 간격을 지정합니다. */
             width: 150px;
-            /* 원하는 너비로 조정할 수 있습니다. */
             text-align: center;
         }
 
         .popup {
-            position: fixed;
-            top: 100px;
-            left: 100px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 20%; /* or whatever height you desire */
+            width: 70%;  /* or whatever width you desire */
+            margin: auto;
             background: rgba(0, 0, 0, 0.5);
-            /* 배경을 반투명하게 만듭니다. */
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 999;
-            /* 다른 요소 위에 나타나도록 설정합니다. */
             display: none;
+        }
+
+        .votes {
+            display: flex;
+            flex-direction: row;
+        }
+        
+        .vote {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;  /* Optional: To center align items vertically */
+        }
+
+        .profile {
+            width:30px;
         }
     </style>
 </head>
 
 <body>
-    <h2>현재 정글의 기상상태</h2>
     <div id="container">
+        <h2>현재 정글의 기상상태</h2>
         <div>
-            <img id="climateImage" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4QBsRXhpZgAASUkqAAgAAAACAA4BAgAvAAAAJgAAAJiCAgAPAAAAVQAAAAAAAABQb2xhciBiZWFyIG9uIHRoZSBwYWNrIGljZSBub3J0aCBvZiBTcGl0c2JlcmdlbkFsZXhleV9TZWFmYXJlcv/tAJZQaG90b3Nob3AgMy4wADhCSU0EBAAAAAAAeRwCUAAPQWxleGV5X1NlYWZhcmVyHAJ4AC9Qb2xhciBiZWFyIG9uIHRoZSBwYWNrIGljZSBub3J0aCBvZiBTcGl0c2JlcmdlbhwCdAAPQWxleGV5X1NlYWZhcmVyHAJuABhHZXR0eSBJbWFnZXMvaVN0b2NrcGhvdG8A/+EFU2h0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8APD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyI+Cgk8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgoJCTxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIgeG1sbnM6SXB0YzR4bXBDb3JlPSJodHRwOi8vaXB0Yy5vcmcvc3RkL0lwdGM0eG1wQ29yZS8xLjAveG1sbnMvIiAgIHhtbG5zOkdldHR5SW1hZ2VzR0lGVD0iaHR0cDovL3htcC5nZXR0eWltYWdlcy5jb20vZ2lmdC8xLjAvIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOnBsdXM9Imh0dHA6Ly9ucy51c2VwbHVzLm9yZy9sZGYveG1wLzEuMC8iICB4bWxuczppcHRjRXh0PSJodHRwOi8vaXB0Yy5vcmcvc3RkL0lwdGM0eG1wRXh0LzIwMDgtMDItMjkvIiB4bWxuczp4bXBSaWdodHM9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9yaWdodHMvIiBkYzpSaWdodHM9IkFsZXhleV9TZWFmYXJlciIgcGhvdG9zaG9wOkNyZWRpdD0iR2V0dHkgSW1hZ2VzL2lTdG9ja3Bob3RvIiBHZXR0eUltYWdlc0dJRlQ6QXNzZXRJRD0iNjM2MzY4MjU4IiB4bXBSaWdodHM6V2ViU3RhdGVtZW50PSJodHRwczovL3d3dy5nZXR0eWltYWdlcy5jb20vZXVsYT91dG1fbWVkaXVtPW9yZ2FuaWMmYW1wO3V0bV9zb3VyY2U9Z29vZ2xlJmFtcDt1dG1fY2FtcGFpZ249aXB0Y3VybCIgPgo8ZGM6Y3JlYXRvcj48cmRmOlNlcT48cmRmOmxpPkFsZXhleV9TZWFmYXJlcjwvcmRmOmxpPjwvcmRmOlNlcT48L2RjOmNyZWF0b3I+PGRjOmRlc2NyaXB0aW9uPjxyZGY6QWx0PjxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+UG9sYXIgYmVhciBvbiB0aGUgcGFjayBpY2Ugbm9ydGggb2YgU3BpdHNiZXJnZW48L3JkZjpsaT48L3JkZjpBbHQ+PC9kYzpkZXNjcmlwdGlvbj4KPHBsdXM6TGljZW5zb3I+PHJkZjpTZXE+PHJkZjpsaSByZGY6cGFyc2VUeXBlPSdSZXNvdXJjZSc+PHBsdXM6TGljZW5zb3JVUkw+aHR0cHM6Ly93d3cuZ2V0dHlpbWFnZXMuY29tL2RldGFpbC82MzYzNjgyNTg/dXRtX21lZGl1bT1vcmdhbmljJmFtcDt1dG1fc291cmNlPWdvb2dsZSZhbXA7dXRtX2NhbXBhaWduPWlwdGN1cmw8L3BsdXM6TGljZW5zb3JVUkw+PC9yZGY6bGk+PC9yZGY6U2VxPjwvcGx1czpMaWNlbnNvcj4KCQk8L3JkZjpEZXNjcmlwdGlvbj4KCTwvcmRmOlJERj4KPC94OnhtcG1ldGE+Cjw/eHBhY2tldCBlbmQ9InciPz4K/9sAhAAJBgcIBwYJCAcICgoJCw0WDw0MDA0bFBUQFiAdIiIgHR8fJCg0LCQmMScfHy09LTE1Nzo6OiMrP0Q/OEM0OTo3AQoKCg0MDRoPDxo3JR8lNzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzf/wAARCACFAMgDASIAAhEBAxEB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"
-                alt="">
+            <img id="climateImage" src="" alt="">
         </div>
-        <button onclick="showElement()">이미지 업로드</button>
+        <button onclick="showSet()">바꿨음</button>
+        <button onclick="showPop()">[+]</button>
         <br>
-        <button id="hotButton" onclick="updateState(Hot)">Hot</button> <button id="goodButton"
-            onclick="updateState(Good)">Good</button>
-        <button id="coldButton" onclick="updateState(Cold)">Cold</button>
-    </div>
-    <div id="pop" class="popup">
-        <button onClick="handleFileSelect('hot')">HOT</button>
-        <button onClick="handleFileSelect('good')">GOOD</button>
-        <button onClick="handleFileSelect('cold')">COLD</button>
-        <div>
-            <button onclick="hidePop()">뒤로 가기</button>
+        <div class="votes">
+            <div id="hot" class="vote">
+                <button id="hotButton" onclick="updateState('hot')">Hot</button>
+                <div class ="profiles">
+                </div>
+            </div>
+            <div id="good" class="vote">
+                <button id="goodButton" onclick="updateState('good')">Good</button>
+                <div class ="profiles">
+                </div>
+            </div>
+            <div id="cold" class="vote">
+                <button id="coldButton" onclick="updateState('cold')">Cold</button>
+                <div class ="profiles">
+                </div>
+            </div>
         </div>
-        <form id="uploadForm" enctype="multipart/form-data">
-            <input type="file" id="imageFile" name="file">
-            <input type="button" value="Upload" onclick="uploadFile()">
-        </form>
+        <div id="climatePop" class="popup">
+            <div>
+                <button onclick="hidePop()">닫기</button>
+            </div>
+            <button onClick="handleFileSelect('hot')">HOT</button>
+            <button onClick="handleFileSelect('good')">GOOD</button>
+            <button onClick="handleFileSelect('none')">COLD</button>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" id="imageFile" name="file">
+                <input type="button" value="Upload" onclick="uploadFile()">
+            </form>
+        </div>
+        <div id="setPop" class="popup">
+            <div>
+                <button onclick="hideSet()">닫기</button>
+            </div>
+            <form id="setForm">
+                <label for="temperature">설정 온도:</label>
+                <input type="number" id="temperature" name="temperature" required>
+                <input type="submit" value="바꿈!">
+            </form>
+        </div>
     </div>
+    
+    
 </body>
 
 </html>
