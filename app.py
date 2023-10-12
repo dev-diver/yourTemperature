@@ -2,22 +2,28 @@ from bson import ObjectId
 from pymongo import MongoClient, DESCENDING
 import boto3
 
-import jwt
+from jwt.exceptions import ExpiredSignatureError
 import hashlib
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request,url_for, redirect
 from flask.json.provider import JSONProvider
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import sys
 
+import jwt
+import hashlib
+
 app = Flask(__name__)
-#client = MongoClient('mongodb://test:test@localhost',27017)
-client = MongoClient('localhost', 27017)
+client = MongoClient('mongodb://test:test@3.35.3.55',27017)
+# client = MongoClient('localhost', 27017)
 ACCESS_KEY='AKIAUVLHFO3JAY6XVO2F'
 S3SECRET_KEY='xGd36QoMpQqi+6WNxtQ48PM1uv6q8OhAkLcIuUNm'
 SECRET_KEY = 'SPARTA'
 
+bucket_name = 'krafton-yourname'
+bucket_url= f'https://{bucket_name}.s3.amazonaws.com'
+base_profile_url = f'{bucket_url}/baseprofile.png'
 
 s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=S3SECRET_KEY)
 
@@ -43,7 +49,15 @@ app.json = CustomJSONProvider(app)
 
 @app.route('/')
 def main():
-    return render_template('index.html') 
+    token_receive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_receive, SECRET_KEY, algorithms=['HS256'])
+        user_info = db.user.find_one({"email": payload["id"]})
+        return render_template('index.html', nickname=user_info["nickname"])
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for("login", msg="로그인 시간이 만료되었습니다."))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for("login", msg="로그인 정보가 존재하지 않습니다."))
 
 @app.route('/login')
 def login():
@@ -58,10 +72,11 @@ def api_register():
     id_receive = request.form['id_give']
     pw_receive = request.form['pw_give']
     nickname_receive = request.form['nickname_give']
+    profile_receive = request.form['profile_give']
 
     pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
 
-    db.user.insert_one({'email': id_receive, 'password': pw_receive, 'nickname': nickname_receive})
+    db.user.insert_one({'email': id_receive, 'password': pw_hash, 'nickname': nickname_receive, 'profile': profile_receive})
 
     return jsonify({'result': 'success'})
 
@@ -74,22 +89,49 @@ def api_login():
 
     result = db.user.find_one({'email': id_receive, 'password': pw_hash})
 
+    if result is not None:
+        # JWT 토큰에는, payload와 시크릿키가 필요합니다.
+        # 시크릿키가 있어야 토큰을 디코딩(=풀기) 해서 payload 값을 볼 수 있습니다.
+        # 아래에선 id와 exp를 담았습니다. 즉, JWT 토큰을 풀면 유저ID 값을 알 수 있습니다.
+        # exp에는 만료시간을 넣어줍니다(5초). 만료시간이 지나면, 시크릿키로 토큰을 풀 때 만료되었다고 에러가 납니다.
+        payload = {
+            'id': id_receive,
+            'exp': datetime.utcnow() + timedelta(seconds=5)
+        }
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+
+        # token을 줍니다.
+        return jsonify({'result': 'success', 'token': token})
+    # 찾지 못하면
+    else:
+        return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
+
+
 @app.route('/api/vote', methods=['POST'])
 def vote():
     state = request.form.get('state')
     email = request.form.get('email')
+
+    user = db.login.find_one({'email',email})
+    nickname = user['nickname'] or '이름없음'
+    profile = user['profile'] or base_profile_url
     message = request.form.get('message','')
     timestamp = datetime.utcnow()
     
-    vote = {'state':state,'email':email,'message':message,'timestamp':timestamp}
+    vote = {
+        'state':state,
+        'email':email,
+        'nickname':nickname,
+        'profile_url':profile,
+        'message':message,
+        'timestamp':timestamp,
+    }
     db.vote.insert_one(vote)
     return jsonify({'result':'success'})
 
 @app.route('/api/votes', methods=['GET'])
 def votes():
-    print("요청")
     lastSet = db.set.find_one(sort=[('timestamp', DESCENDING)])
-    print("lastSet",lastSet)
     lastTime = lastSet['timestamp']
     recent_votes = list(db.vote.find({'timestamp': {'$gte': lastTime}}))
     hot = [doc for doc in recent_votes if doc['state'] == 'hot']
@@ -105,8 +147,6 @@ def votes():
         'most': max_state
     }
     result = {'result':'success'}
-    result.update(response_data)
-    print(result)
     return jsonify(result)
 
 @app.route('/api/stateImages', methods=['GET'])
@@ -122,13 +162,22 @@ def upload_image():
     email=request.form['email']
     state=request.form['state']
     file = request.files['file']
+    category= request.form.get('category','state')
+    print(category)
+    timestamp = get_js_timestamp()
     if file:
+        #TODO:S3 서버 장애시 대응
+        filename = category+'/'+state+str(timestamp)
+        print(filename)
         # S3에 파일 업로드
-        s3_client.upload_fileobj(file, 'krafton_yourname', file.filename+'1')
+        s3_client.upload_fileobj(file, 'krafton-yourname', filename)
         # S3 파일 URL 생성
-        file_url = f"https://krafton_yourname.s3.amazonaws.com/{file.filename+'1'}"
+        file_url = f"{bucket_url}/{filename}"
 
-        doc = {'email':email,'state':state,'image_url': file_url}
+        doc = {
+            'email':email,
+            'state':state,
+            'img_url': file_url}
         db.image.insert_one(doc)
         
         return jsonify({'result': 'success'}), 200
@@ -139,11 +188,27 @@ def upload_image():
 def set_temperature():
     email=request.form['email']
     temperature = request.form['temperature']
+
+    user = db.login.find_one({'email',email})
+    nickname = user['nickname'] or '이름없음'
+    profile = user['profile'] or base_profile
     timestamp = datetime.utcnow()
-    set = {'email':email,'temperature':temperature,'timestamp':timestamp}
+    set = {
+        'email':email,
+        'temperature':temperature,
+        'nickname':nickname,
+        'profile':profile,
+        'timestamp':timestamp}
     db.set.insert_one(set)
     result = {'result':'success'}
     return jsonify(result)
+
+def get_js_timestamp():
+
+    now = datetime.utcnow()
+    unix_timestamp = now.timestamp()
+    js_timestamp = int(unix_timestamp * 1000)
+    return js_timestamp
 
 if __name__ == '__main__':
     app.run(debug=True)
