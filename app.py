@@ -305,12 +305,40 @@ def set_temperature():
     result = {'result':'success'}
     return jsonify(result)
 
+@app.route('/api/set', methods=['GET'])
+def get_temperature():
+    lastTime = None
+    try:
+        lastSet = db.set.find_one(sort=[('timestamp', DESCENDING)])
+        lastTime = convert_jstimestamp(lastSet['timestamp'])
+        lastTemperature = lastSet['temperature']
+        return jsonify({
+            'result':'success',
+            "temperature":lastTemperature,
+            "lastTime":lastTime
+            })
+    except:
+        return jsonify({
+            'result':'fail',
+            "temperature":"0",
+            lastTime:"0"
+        })
+
 def get_js_timestamp():
 
     now = datetime.utcnow()
     unix_timestamp = now.timestamp()
     js_timestamp = int(unix_timestamp * 1000)
     return js_timestamp
+
+def convert_jstimestamp(jstimestamp):
+    # JavaScript의 timestamp를 초 단위로 변환
+    timestamp_in_seconds = jstimestamp / 1000
+    dt = datetime.fromtimestamp(timestamp_in_seconds)
+
+    # 월/일/시/분 형식으로 변환
+    formatted_date = dt.strftime('%m월 %d일 %H시 %M분')
+    return formatted_date
 
 @app.route('/dynamicjs/login')
 def login_js():

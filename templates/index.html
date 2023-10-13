@@ -12,18 +12,18 @@
 {% endblock %}
 {% block body %}
 <div class="box">
+    <div class="has-text-right"><button class="button" onclick="logout()">로그아웃</button></div>
     <div class="title is-2 has-text-centered">현재 정글의 기상상태</div>
     <div class="title is-3 has-text-centered" id="climateMessage"></div>
-    <div class="has-text-right"><button class="button" onclick="logout()">로그아웃</button></div>
+    <div id="lastTemperature"></div>
     <br>
-    <div>
-        <div class="box">
-            <img id="climateImage" src="" alt="">
-            <div id="climateImageUser" class="has-text-right has-text-weight-bold"></div>
-        </div>
+    <div class="box">
+        <img id="climateImage" src="" alt="">
+        <div id="climateImageUser" class="has-text-right has-text-weight-bold"></div>
     </div>
     <br>
     <div class="has-text-right">
+        
         <button onclick="" class="button is-danger is-outlined js-modal-trigger" data-target="setPop">
             <span class="icon is-small">
                 <ion-icon name="thermometer-outline"></ion-icon>

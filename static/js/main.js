@@ -21,6 +21,7 @@ $(document).ready(function () {
     console.log(user)
     console.log(user['email'], user['nickname'])
     showState();
+    getTemperature();
 
     $('#setForm').on('submit', function (e) {
         e.preventDefault();  // Prevents the form from submitting the traditional way
@@ -215,6 +216,23 @@ function changeTemperature(temperature) {
                 alert('설정 완료')
                 window.location.reload()
             }
+        }
+    });
+}
+
+function getTemperature(){
+    $.ajax({
+        type: 'GET',
+        url: '/api/set',
+        contentType: 'application/json',
+        success: function (response) {
+            let text = ""
+            if (response['result'] == 'success') {
+                text = `${response['lastTime']} 에 ${response['temperature']} 로 설정 `
+            } else {
+                text = "온도 설정을 안했어요."
+            }
+            $('#lastTemperature').text(text)
         }
     });
 }
