@@ -3,28 +3,38 @@
     <div class="modal-content">
         <div class="box">
             <div class="columns">
-                <button class="column is-one-third button is-danger is-small" onClick="handleFileSelect('hot')">HOT</button>
-                <button class="column button is-success is-small" onClick="handleFileSelect('good')">GOOD</button>
-                <button class="column button is-link is-small" onClick="handleFileSelect('cold')">COLD</button>
+                <div class="column is-one-third ">
+                    <button class="button is-danger " onClick="handleFileSelect('hot')">HOT</button>
+                </div>
+                <div class="column is-one-third ">
+                    <button class="button is-success" onClick="handleFileSelect('good')">GOOD</button>
+                </div>
+                <div class="column is-one-third ">
+                    <button class="button is-link" onClick="handleFileSelect('cold')">COLD</button>
+                </div>
             </div>
-            <form id="uploadForm" class="column is-10 file has-name is-full is-small"
-                enctype="multipart/form-data">
-                <label class="file-label ">
-                    <input id="imageFile" class="file-input" type="file" name="file" accept="image/*">
-                    <span class="file-cta">
+            <form id="uploadForm" class="hide" enctype="multipart/form-data">
+                <div class="file is-link has-name is-fullwidth">
+                    <label class="file-label">
+                      <input id="profile" class="file-input" type="file" name="resume">
+                      <span class="file-cta">
                         <span class="file-icon">
-                            <i class="fas fa-upload"></i>
+                          <i class="fas fa-upload"></i>
                         </span>
                         <span class="file-label">
-                            파일 선택…
+                          Info file…
                         </span>
-                    </span>
-                    <span class="file-name"></span>
-                </label>
+                      </span>
+                      <span class="file-name">
+                        파일을 올려주세요
+                      </span>
+                    </label>
+                  </div>
+                  <br>
+                  <div class="has-text-right">
+                    <input class="button" type="button" value="Upload" onclick="uploadFile()">
+                </div>
             </form>
-            <div class="has-text-right">
-                <input class="column button" type="button" value="Upload" onclick="uploadFile()">
-            </div>
         </div>
         <button class="modal-close is-large" aria-label="close"></button>
     </div>

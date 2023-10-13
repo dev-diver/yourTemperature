@@ -244,6 +244,7 @@ function handleFileSelect(state) {
 
 function showPop() {
     uploadImageState = 'none'
+    $('#uploadForm').css('display', 'none');
 }
 
 function setVoteState(state) {
