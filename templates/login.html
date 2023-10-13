@@ -12,23 +12,34 @@
 {% endblock %}
 {% block body %}
 <div>
-    <section class="signin">
-        <h1>너의 온도는</h1>
-        <div class="signin__card">
-            <h2>
-                <strong>로그인</strong> 
-            </h2>
+    <section class="box signin has-text-weight-bold">
+        <h1 class="title is-2">너의 온도는</h1>
+        <div>
+            <div class="title is-3">로그인</div>
             <div>
-                <input type="text" id="email" aria-describedby="emailHelp" placeholder="아이디를 입력하세요." />
-                <input type="password" id="password" placeholder="비밀번호를 입력하세요." />
-                <div>
-                    <button class="member" onclick="login()">로그인</button>
-                </div>
-                <p>
-                    * 회원가입해주세요
-                </p>
-                <div>
-                    <a class="member" href="register">회원 가입</a>
+                <div class="field">
+                    <p class="control has-icons-left has-icons-right">
+                      <input id="email" class="input" type="email" placeholder="Email">
+                      <span class="icon is-small is-left">
+                        <i class="fas fa-envelope"></i>
+                      </span>
+                      <span class="icon is-small is-right">
+                        <i class="fas fa-check"></i>
+                      </span>
+                    </p>
+                  </div>
+                  <div class="field">
+                    <p class="control has-icons-left">
+                      <input id="password" class="input" type="password" placeholder="Password">
+                      <span class="icon is-small is-left">
+                        <i class="fas fa-lock"></i>
+                      </span>
+                    </p>
+                  </div>
+                <br>
+                <div class="has-text-right">
+                    <a class="button" href="register">회원 가입</a>
+                    <a class="button is-link" onclick="login()">로그인</a>
                 </div>
             </div>
         </div>

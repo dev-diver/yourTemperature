@@ -15,12 +15,13 @@ body {
     width: 400px;
     height: 470px;
     background: skyblue;
-    color: white;
+    
     padding: 30px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .signin h1 {
+    color: white;
     font-size: 2em;
     margin: 0;
 }

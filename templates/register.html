@@ -13,24 +13,59 @@
 {% block body %}
 <div>
     <!-- Sign Up -->
-    <section class="signin">
-        <h1>너의 온도는</h1>
-        <div class="signin__card">
-            <h2>
-                <strong>[회원가입]</strong> 
-            </h2>
+    <section class="signin box has-text-weight-bold">
+        <h1 class="title is-2">너의 온도는</h1>
+        <div>
+            <div class="title is-3">회원가입</div>
             <div>
                 <form id="uploadForm" enctype="multipart/form-data"></form>
-                    <input type="text" id="email" name="email" placeholder="아이디를 입력하세요." />
-                    <p>
-                        * 메일형식만 입력 가능합니다.
-                    </p>
-                    <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요." />
-                    <input type="text" id="nickname" name="nickname" placeholder="닉네임을 입력하세요." />
-                    <input type="file" id="profile" name="file" accept="image/*">
-                    <button class="member" onclick="register()">가입하기</button>
+                    <div class="field">
+                        <p class="control has-icons-left has-icons-right">
+                        <input id="email" class="input" type="email" placeholder="Email">
+                        <span class="icon is-small is-left">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <span class="icon is-small is-right">
+                            <i class="fas fa-check"></i>
+                        </span>
+                        </p>
+                    </div>
+                    <div class="field">
+                        <p class="control has-icons-left">
+                            <input id="password" class="input" type="password" placeholder="Password">
+                            <span class="icon is-small is-left">
+                            <i class="fas fa-lock"></i>
+                            </span>
+                        </p>
+                    </div>
+                    <div class="field">
+                        <label class="label">닉네임</label>
+                        <div class="control">
+                            <input id="nickname" class="input" type="text" placeholder="e.g Alex Smith">
+                        </div>
+                    </div>
+                    <div class="file is-link has-name is-fullwidth">
+                        <label class="file-label">
+                          <input class="file-input" type="file" name="resume">
+                          <span class="file-cta">
+                            <span class="file-icon">
+                              <i class="fas fa-upload"></i>
+                            </span>
+                            <span class="file-label">
+                              Info file…
+                            </span>
+                          </span>
+                          <span class="file-name">
+                            파일을 올려주세요
+                          </span>
+                        </label>
+                      </div>
+                    <br>
+                    <div  class="has-text-right">
+                        <a class="button"  href="/login">취소</a>
+                        <a class="button is-link" onclick="register()">가입하기</a>
+                    </div>
                 </form>
-                <a class="member 2"  href="/login">취소</a>
             </div>
         </div>
     </section>
