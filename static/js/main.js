@@ -20,8 +20,8 @@ $(document).ready(function () {
     user = JSON.parse($.cookie('user'))
     console.log(user)
     console.log(user['email'], user['nickname'])
-    showState();
-    getTemperature();
+    reload()
+    
 
     $('#setForm').on('submit', function (e) {
         e.preventDefault();  // Prevents the form from submitting the traditional way
@@ -41,6 +41,23 @@ $(document).ready(function () {
         $(this).find('.message').css('display', 'none')
     });
 });
+
+function reload(){
+    Array.from($(".modal")).forEach(e=>{
+        e.classList.remove('is-active')
+    })
+    clearVotes();
+    showState();
+    getTemperature();
+}
+
+function clearVotes(){
+    let voteResults = Array.from($(".profile-row"))
+    console.log(voteResults)
+    voteResults.forEach((e,i)=>{
+        e.remove()
+    })
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     // Functions to open and close a modal
@@ -138,7 +155,7 @@ function show_profile(state) {
         mod = i % 2
         console.log(row, mod)
         if (mod == 0) {
-            $(`#${state} > .profiles`).append(`<div id=${state}${row} class="columns"></div>`)
+            $(`#${state} > .profiles`).append(`<div id=${state}${row} class="columns profile-row"></div>`)
         }
         $(`#${state}${row}`).append(html_template);
     }
@@ -171,7 +188,7 @@ function updateState(newState, message) {
         success: function (response) {
             if (response['result'] == 'success') {
                 alert('투표 완료')
-                window.location.reload()
+                reload()
             }
         }
     });
@@ -214,7 +231,7 @@ function changeTemperature(temperature) {
         success: function (response) {
             if (response['result'] == 'success') {
                 alert('설정 완료')
-                window.location.reload()
+                reload()
             }
         }
     });
