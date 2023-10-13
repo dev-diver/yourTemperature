@@ -310,14 +310,15 @@ def get_temperature():
     lastTime = None
     try:
         lastSet = db.set.find_one(sort=[('timestamp', DESCENDING)])
-        lastTime = convert_jstimestamp(lastSet['timestamp'])
+        #lastTime = convert_jstimestamp(lastSet['timestamp'])
         lastTemperature = lastSet['temperature']
         return jsonify({
             'result':'success',
             "temperature":lastTemperature,
             "lastTime":lastTime
             })
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({
             'result':'fail',
             "temperature":"0",

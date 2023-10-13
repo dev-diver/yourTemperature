@@ -226,9 +226,10 @@ function getTemperature(){
         url: '/api/set',
         contentType: 'application/json',
         success: function (response) {
+            console.log("getClimate", response)
             let text = ""
             if (response['result'] == 'success') {
-                text = `${response['lastTime']} 에 ${response['temperature']} 로 설정 `
+                text = `현재 ${response['temperature']} 도로 설정 `
             } else {
                 text = "온도 설정을 안했어요."
             }
