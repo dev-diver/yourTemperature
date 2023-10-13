@@ -6,7 +6,6 @@ function isValidEmail(email) {
     return regex.test(email);
 }
 function register() {
-    console.log($('#uploadForm'))
     var formData = new FormData()
     formData.append('file', $('#profile')[0].files[0])
     let email = $('#email').val()
