@@ -31,6 +31,11 @@ function register() {
             } else {
                 alert(response['msg'])
             }
+        },
+        error: function (jqXHR, textStatus, errorMessage) {
+            console.log('Error uploading file:', errorMessage);
+            console.log(jqXHR)
+            alert(jqXHR.responseJSON['message'])
         }
     })
 }

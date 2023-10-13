@@ -95,6 +95,10 @@ def api_register():
         filename = f'profile{email}'
         file_url = getFileUrl(file,filename)
 
+    count = db.user.count_documents({'email':email})
+    if count !=0:
+        return jsonify({'result':"fail","message":"이미 가입된 메일입니다."}), 400
+
     db.user.insert_one({
         'email': email, 
         'password': password_hash, 
@@ -189,7 +193,7 @@ def votes():
         states = {'hot':len(hot),'good':len(good),'cold':len(cold)}
         max_state = max(states, key=lambda k: states[k])
         print('hot',len(hot),"cold",len(cold),'good',len(good),max_state)
-        if(len(hot)==len(good) or len(hot)==len(cold)): 
+        if((len(hot)==len(good) and max_state !='cold') or len(hot)==len(cold) or (len(cold)==len(good) and max_state !='hot')): 
             max_state = 'good'
         if(len(hot)==0 and len(good)==0 and len(cold)==0):
             max_state = 'none'
@@ -330,4 +334,5 @@ def getUserByEmail(email):
     return user
 
 if __name__ == '__main__':
-    app.run('0,0,0,0',port=5000,debug=True)
+    # app.run('0,0,0,0',port=5000,debug=True)
+    app.run(port=5000,debug=True)
