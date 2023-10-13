@@ -8,11 +8,12 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
+    background:linear-gradient(to bottom, #9370DB, #4B0082);
 }
 
 .signin {
-    width: 60%;
-    max-width: 960px; /* 16:9 aspect ratio */
+    width: 400px;
+    height: 470px;
     background: skyblue;
     color: white;
     padding: 30px;

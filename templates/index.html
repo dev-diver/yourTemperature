@@ -1,111 +1,135 @@
 {% extends "base.html" %}
 {% block script %}
-    <script src={{ url_for('static', filename='js/main.js') }}></script>
+<script src={{ url_for('static', filename='js/main.js' ) }}></script>
 {% endblock %}
 {% block style %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 {% endblock %}
 {% block font %}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300&display=swap" rel="stylesheet">
 {% endblock %}
 {% block body %}
-<div class="container">
-    <h2 class="title is-2" style="margin-top: 30px;">현재 정글의 기상상태</h2>
-    <h3 class="title is-3" id="climateMessage"></h3>
+<div class="box">
+    <div class="title is-2 has-text-centered">현재 정글의 기상상태</div>
+    <div class="title is-3 has-text-centered" id="climateMessage"></div>
     <div class="has-text-right"><button class="button" onclick="logout()">로그아웃</button></div>
+    <br>
     <div>
-        <img id="climateImage" src="" alt="">
-        <p id="climateImageUser"></p>
+        <div class="box">
+            <img id="climateImage" src="" alt="">
+            <div id="climateImageUser" class="has-text-right has-text-weight-bold"></div>
+        </div>
     </div>
-    <button onclick="showSet()" class="button is-danger is-outlined">
-        <span class="icon is-small">
-            <ion-icon name="thermometer-outline"></ion-icon>
-        </span>
-        <span>온도 설정</span>
-    </button>
-    <button class="button is-info is-outlined" onclick="showPop()">
-        <span class="icon is-small">
-            <ion-icon name="cloud-upload-outline"></ion-icon>
-        </span>
-        <span>사진 업로드</span>
-    </button>
     <br>
+    <div class="has-text-right">
+        <button onclick="" class="button is-danger is-outlined js-modal-trigger" data-target="setPop">
+            <span class="icon is-small">
+                <ion-icon name="thermometer-outline"></ion-icon>
+            </span>
+            <span>온도 설정</span>
+        </button>
+        <button class="button is-info is-outlined js-modal-trigger" data-target="climatePop" onclick="showPop()">
+            <span class="icon is-small">
+                <ion-icon name="cloud-upload-outline"></ion-icon>
+            </span>
+            <span>사진 업로드</span>
+        </button>
+    </div>
     <br>
-    <br>
-    <div class="columns">
+    <div class="columns has-text-centered">
         <div id="hot" class="column is-one-third">
-            <button class="button is-danger is-medium" onclick="showMsgInput('hot')">Hot</button>
+            <button 
+                class="button is-danger is-medium js-modal-trigger" 
+                data-target="msgInputPop" 
+                onclick="setVoteState('hot')">Hot</button>
             <div class="profiles">
             </div>
         </div>
         <div id="good" class="column">
-            <button class="button is-success is-medium" onclick="showMsgInput('good')">Good</button>
+            <button 
+                class="button is-success is-medium js-modal-trigger" 
+                data-target="msgInputPop" 
+                onclick="setVoteState('good')">Good</button>
             <div class="profiles">
             </div>
         </div>
         <div id="cold" class="column ">
-            <button class="button is-link is-medium" onclick="showMsgInput('cold')">Cold</button>
+            <button 
+                class="button is-info is-medium js-modal-trigger" 
+                data-target="msgInputPop" 
+                onclick="setVoteState('cold')">Cold</button>
             <div class="profiles">
             </div>
         </div>
     </div>
-    <div id="climatePop" class="popup">
-        <div style="margin-bottom: 5px; text-align: right ;">
-            <button onclick="hidePop()" class="bulma-delete-mixin is-small"></button>
-        </div>
-        <div style="margin-bottom: 20px;">
-            <button class="button is-danger is-small" onClick="handleFileSelect('hot')">HOT</button>
-            <button class="button is-success is-small" onClick="handleFileSelect('good')">GOOD</button>
-            <button class="button is-link is-small" onClick="handleFileSelect('cold')">COLD</button>
-        </div>
-        
-        <div class="columns">
-        <form id="uploadForm" class="column is-10 file has-name is-fullwidth is-small" enctype="multipart/form-data">
-            <label class="file-label ">
-                <input id ="imageFile" class="file-input" type="file" name="file" accept="image/*">
-                <span class="file-cta">
-                  <span class="file-icon">
-                    <i class="fas fa-upload"></i>
-                  </span>
-                  <span class="file-label">
-                    Choose a file…
-                  </span>
-                </span>
-                <span class="file-name">
-                  
-                </span>
-              </label>
-            
-            </form>
-            <input type="button" value="Upload" onclick="uploadFile()">
-        </div>
-        
-    </div>
-    <div id="setPop" class="popup">
-        <div style="text-align: right;">
-            <button onclick="hideSet()" class="button"><ion-icon name="close-outline" size="large"
-                    style="color: red;""></ion-icon></button>
-        </div>
-        <div style=" text-align: center;">
-                    <form id="setForm">
-                        <label for="temperature"><strong style="color: white;">설정 온도:</strong></label>
-                        <input class="input is-small" type="number" id="temperature" name="temperature" required
-                            style="width: 60px;">
-                        <input type="submit" value="바꿈!">
-                    </form>
+    <div id="climatePop" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box">
+                <div class="columns">
+                    <button class="column is-one-third button is-danger is-small" onClick="handleFileSelect('hot')">HOT</button>
+                    <button class="column button is-success is-small" onClick="handleFileSelect('good')">GOOD</button>
+                    <button class="column button is-link is-small" onClick="handleFileSelect('cold')">COLD</button>
+                </div>
+                <form id="uploadForm" class="column is-10 file has-name is-full is-small"
+                    enctype="multipart/form-data">
+                    <label class="file-label ">
+                        <input id="imageFile" class="file-input" type="file" name="file" accept="image/*">
+                        <span class="file-cta">
+                            <span class="file-icon">
+                                <i class="fas fa-upload"></i>
+                            </span>
+                            <span class="file-label">
+                                파일 선택…
+                            </span>
+                        </span>
+                        <span class="file-name"></span>
+                    </label>
+                </form>
+                <div class="has-text-right">
+                    <input class="column button" type="button" value="Upload" onclick="uploadFile()">
+                </div>
+            </div>
+            <button class="modal-close is-large" aria-label="close"></button>
         </div>
     </div>
-    <div id="msgInputPop" class="popup">
-        <div>
-            <button onclick="hideMsgInput()" class="button is-danger"><ion-icon name="close-circle-outline"></ion-icon></button>
+    <div id="setPop" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box">
+                <form id="setForm">
+                    <label class="field" for="temperature">설정 온도:</label>
+                    <input 
+                        class="input is-link" 
+                        type="number" id="temperature" 
+                        name="temperature" required>
+                    <div class="has-text-right">
+                        <input class="button" type="submit" value="바꿈!">
+                    </div>
+                </form>
+            </div>
+            <button class="modal-close is-large" aria-label="close"></button>
         </div>
-        <form id="setForm">
-            <label for="temperature">메시지:</label>
-            <input type="text" id="message" name="message" placeholder="">
-            <input type="submit" value="투표">
-        </form>
+    </div>
+    <div id="msgInputPop" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box is-small">
+                <form id="setForm">
+                    <label class="field" for="message">메시지:</label>
+                    <input 
+                        class="input is-link" 
+                        type="text" id="message" 
+                        name="message" placeholder="하고 싶은 말을 적어주세요">
+                    <div class="has-text-right">
+                        <input class="button" type="submit" value="투표">
+                    </div>
+                </form>
+            </div>
+            <button class="modal-close is-large" aria-label="close"></button>
+        </div>
     </div>
 </div>
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>

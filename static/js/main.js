@@ -41,6 +41,49 @@ $(document).ready(function () {
     });
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    // Functions to open and close a modal
+    function openModal($el) {
+      $el.classList.add('is-active');
+    }
+  
+    function closeModal($el) {
+      $el.classList.remove('is-active');
+    }
+  
+    function closeAllModals() {
+      (document.querySelectorAll('.modal') || []).forEach(($modal) => {
+        closeModal($modal);
+      });
+    }
+  
+    // Add a click event on buttons to open a specific modal
+    (document.querySelectorAll('.js-modal-trigger') || []).forEach(($trigger) => {
+      const modal = $trigger.dataset.target;
+      const $target = document.getElementById(modal);
+  
+      $trigger.addEventListener('click', () => {
+        openModal($target);
+      });
+    });
+  
+    // Add a click event on various child elements to close the parent modal
+    (document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(($close) => {
+      const $target = $close.closest('.modal');
+  
+      $close.addEventListener('click', () => {
+        closeModal($target);
+      });
+    });
+  
+    // Add a keyboard event to close all modals
+    document.addEventListener('keydown', (event) => {
+      if (event.code === 'Escape') {
+        closeAllModals();
+      }
+    });
+  });
+
 function logout() {
     $.removeCookie('user');
     $.removeCookie('token');
@@ -83,7 +126,7 @@ function show_profile(state) {
         message = voteMsg == "" ? stateCuteMsg[state] : voteMsg
         console.log(voteMsg, stateMsg[state])
         html_template = `
-                    <div class="profile-container column is-6">
+                    <div class="profile-container column is-half">
                         <figure class="image is-48x48">
                         <img class="profile is-rounded" src=${url}>
                         </figure>
@@ -178,35 +221,13 @@ function changeTemperature(temperature) {
 
 function handleFileSelect(state) {
     uploadImageState = state
-    console.log(uploadImageState)
     $('#uploadForm').css('display', 'block');
 }
 
 function showPop() {
-    var pop = document.getElementById('climatePop');
-    pop.style.display = 'block'; // 요소를 보이게 만듭니다.
     uploadImageState = 'none'
-    $('#uploadForm').css('display', 'none');
 }
 
-function hidePop() {
-    var pop = document.getElementById('climatePop');
-    pop.style.display = 'none'; // 요소를 숨깁니다
-}
-
-function showSet() {
-    $('#setPop').css('display', 'block')
-}
-
-function hideSet() {
-    $('#setPop').css('display', 'none')
-}
-
-function showMsgInput(state) {
+function setVoteState(state) {
     voteState = state
-    $('#msgInputPop').css('display', 'block')
-}
-
-function hideMsgInput() {
-    $('#msgInputPop').css('display', 'none')
 }
