@@ -138,7 +138,7 @@ function show_profile(state) {
         mod = i % 2
         console.log(row, mod)
         if (mod == 0) {
-            $(`#${state} > .profiles`).append(`<div id=${state}${row} class="columns row"></div>`)
+            $(`#${state} > .profiles`).append(`<div id=${state}${row} class="columns"></div>`)
         }
         $(`#${state}${row}`).append(html_template);
     }

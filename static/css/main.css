@@ -14,3 +14,21 @@ body {
 .modal-content {
     width : 400px;
 }
+
+.image.is-48x48 {
+    width: 48px;
+    height: 48px;
+    overflow: hidden; /* 이미지가 컨테이너를 벗어나지 않도록 함 */
+    position: relative; /* 이미지를 가운데 정렬하기 위한 기준 설정 */
+}
+
+.image.is-48x48 img {
+    width: 100%; /* 이미지의 너비를 컨테이너 너비에 맞춤 */
+    height: 100%; /* 이미지의 높이를 컨테이너 높이에 맞춤 */
+    object-fit: cover; /* 이미지를 크롭하여 컨테이너에 맞게 조정 */
+    object-position: center center; /* 이미지를 가운데 정렬 */
+}
+
+.hide {
+    display: none;
+}
