@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from bson import ObjectId
 from pymongo import MongoClient, DESCENDING
 import boto3
@@ -9,17 +10,21 @@ from flask.json.provider import JSONProvider
 
 from datetime import datetime, timedelta
 import json
-import sys
+import os
 
 import jwt
 import hashlib
 
+load_dotenv()
 app = Flask(__name__)
-client = MongoClient('mongodb://test:test@3.35.3.55',27017)
+MONGO_IP= os.environ.get('MONGO_IP')
+ACCESS_KEY= os.environ.get('ACCESS_KEY')
+S3SECRET_KEY= os.environ.get('S3SECRET_KEY')
+SECRET_KEY= os.environ.get('SECRET_KEY')
+bucket_name= os.environ.get('BUCKET')
+
+client = MongoClient(MONGO_IP,27017)
 # client = MongoClient('localhost', 27017)
-ACCESS_KEY='AKIAUVLHFO3JAY6XVO2F'
-S3SECRET_KEY='xGd36QoMpQqi+6WNxtQ48PM1uv6q8OhAkLcIuUNm'
-SECRET_KEY = 'SPARTA'
 
 bucket_name = 'krafton-yourname'
 bucket_url= f'https://{bucket_name}.s3.amazonaws.com'
