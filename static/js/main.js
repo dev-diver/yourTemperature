@@ -195,7 +195,8 @@ function updateState(newState, message) {
 }
 
 function uploadFile() {
-    var formData = new FormData($('#uploadForm')[0]);
+    var formData = new FormData();
+    formData.append('file', $('#climateFile')[0].files[0])
     formData.append('email', user['email'])
     formData.append('state', uploadImageState)
     console.log("전송", formData)
@@ -208,13 +209,13 @@ function uploadFile() {
         success: function (response) {
             console.log('File uploaded successfully:', response);
             alert("업로드 성공 !!")
+            reload()
         },
         error: function (jqXHR, textStatus, errorMessage) {
             console.log('Error uploading file:', errorMessage);
             alert("업로드 실패 !!")
         }
     });
-    hidePop()
 }
 
 function changeTemperature(temperature) {
